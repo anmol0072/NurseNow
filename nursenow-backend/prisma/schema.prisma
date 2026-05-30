@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums are not supported in SQLite, use String with application-level validation.
+
+model User {
+  id              String   @id @default(uuid())
+  role            String   @default("PATIENT")
+  phone           String   @unique
+  name            String?
+  age             Int?
+  gender          String?
+  address         String?
+  uhid            String?  @unique // Unique Health ID for patients
+  
+  // Nurse specific fields
+  experience      Int?
+  rating          Float?   @default(0)
+  isVerified      Boolean  @default(false)
+  isBlacklisted   Boolean  @default(false)
+  currentLat      Float?
+  currentLng      Float?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patientBookings Booking[] @relation("PatientBookings")
+  nurseBookings   Booking[] @relation("NurseBookings")
+  documents       Document[]
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // INC Diploma, Degree, Aadhar, PAN, Prescription
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id            String   @id @default(uuid())
+  name          String   // e.g. IM Injection, IV Injection, Catheterization
+  basePrice     Float    // e.g. 400, 699, 1000
+  baseDistance  Float    @default(4) // km
+  extraPerKm    Float    @default(12) // rupees per extra km
+  taxRate       Float    @default(0.18) // 18% GST
+  
+  bookings      Booking[]
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  patientId      String
+  patient        User          @relation("PatientBookings", fields: [patientId], references: [id])
+  nurseId        String?
+  nurse          User?         @relation("NurseBookings", fields: [nurseId], references: [id])
+  serviceId      String
+  service        Service       @relation(fields: [serviceId], references: [id])
+  
+  status         String        @default("PENDING")
+  totalAmount    Float         // Computed total amount
+  distance       Float         // Distance in km
+  
+  prescriptionUrl String?
+  paymentStatus   String       @default("PENDING") // PENDING, SUCCESS, FAILED
+  paymentMethod   String?      // UPI, CASH, NETBANKING
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
