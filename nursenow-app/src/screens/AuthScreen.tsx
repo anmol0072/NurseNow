@@ -44,13 +44,8 @@ export default function AuthScreen({ navigation }: any) {
       
       if (data.success) {
         setOtpSent(true);
-        if (data.mockOtp) {
-          showToast(`💬 New Text: Your OTP is ${data.mockOtp}`);
-          // Auto-fill the OTP for the user to make the demo smoother!
-          setOtp(data.mockOtp);
-        } else {
-          showToast('OTP Sent. Check your SMS.');
-        }
+        setOtp(''); // clear any old OTP
+        showToast('OTP Sent! Please check your Email/SMS inbox.');
       } else {
         showAlert('Error', data.message);
       }

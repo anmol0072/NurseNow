@@ -63,7 +63,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         console.log(`📧 [MOCK EMAIL] To: ${normalizedId}`);
         console.log(`✉️ Message: Your NurseNow OTP is ${otp}`);
         console.log(`======================================\n`);
-        res.json({ success: true, message: 'Mock Email OTP sent', mockOtp: otp });
+        res.json({ success: true, message: 'Mock Email OTP sent (Check Render Logs)' });
         return;
       }
     } else {
@@ -98,7 +98,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         console.log(`📱 [MOCK SMS] To: ${normalizedId}`);
         console.log(`✉️ Message: Your NurseNow OTP is ${otp}`);
         console.log(`======================================\n`);
-        res.json({ success: true, message: 'Mock SMS OTP sent', mockOtp: otp });
+        res.json({ success: true, message: 'Mock SMS OTP sent (Check Render Logs)' });
         return;
       }
     }
