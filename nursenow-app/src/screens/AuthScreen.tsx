@@ -184,6 +184,8 @@ export default function AuthScreen({ navigation }: any) {
                       autoCapitalize="none"
                       value={identifier}
                       onChangeText={setIdentifier}
+                      onSubmitEditing={handleSendOtp}
+                      returnKeyType="send"
                     />
                   </View>
                   <TouchableOpacity activeOpacity={0.8} onPress={handleSendOtp}>
@@ -210,6 +212,8 @@ export default function AuthScreen({ navigation }: any) {
                       maxLength={6}
                       value={otp}
                       onChangeText={setOtp}
+                      onSubmitEditing={handleVerifyOtp}
+                      returnKeyType="send"
                     />
                   </View>
                   <TouchableOpacity activeOpacity={0.8} onPress={handleVerifyOtp}>
