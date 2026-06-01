@@ -13,6 +13,7 @@ export default function AuthScreen({ navigation }: any) {
   const [identifier, setIdentifier] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (message: string) => {
@@ -34,6 +35,7 @@ export default function AuthScreen({ navigation }: any) {
       return;
     }
     
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/send-otp`, {
         method: 'POST',
@@ -51,6 +53,8 @@ export default function AuthScreen({ navigation }: any) {
       }
     } catch (e) {
       showAlert('Network Error', 'Cannot connect to backend server');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,6 +64,7 @@ export default function AuthScreen({ navigation }: any) {
       return;
     }
 
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/verify-otp`, {
         method: 'POST',
@@ -188,15 +193,15 @@ export default function AuthScreen({ navigation }: any) {
                       returnKeyType="send"
                     />
                   </View>
-                  <TouchableOpacity activeOpacity={0.8} onPress={handleSendOtp}>
+                  <TouchableOpacity activeOpacity={0.8} onPress={handleSendOtp} disabled={isLoading}>
                     <LinearGradient
-                      colors={['#14b8a6', '#0f766e']}
+                      colors={isLoading ? ['#94a3b8', '#64748b'] : ['#14b8a6', '#0f766e']}
                       style={styles.primaryButton}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                     >
-                      <Text style={styles.primaryButtonText}>Send OTP</Text>
-                      <Ionicons name="arrow-forward" size={20} color="#fff" />
+                      <Text style={styles.primaryButtonText}>{isLoading ? 'Sending...' : 'Send OTP'}</Text>
+                      {!isLoading && <Ionicons name="arrow-forward" size={20} color="#fff" />}
                     </LinearGradient>
                   </TouchableOpacity>
                 </>
@@ -216,15 +221,15 @@ export default function AuthScreen({ navigation }: any) {
                       returnKeyType="send"
                     />
                   </View>
-                  <TouchableOpacity activeOpacity={0.8} onPress={handleVerifyOtp}>
+                  <TouchableOpacity activeOpacity={0.8} onPress={handleVerifyOtp} disabled={isLoading}>
                     <LinearGradient
-                      colors={['#14b8a6', '#0f766e']}
+                      colors={isLoading ? ['#94a3b8', '#64748b'] : ['#14b8a6', '#0f766e']}
                       style={styles.primaryButton}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                     >
-                      <Text style={styles.primaryButtonText}>Verify & Login</Text>
-                      <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
+                      <Text style={styles.primaryButtonText}>{isLoading ? 'Verifying...' : 'Verify & Login'}</Text>
+                      {!isLoading && <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />}
                     </LinearGradient>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.secondaryAction}>
