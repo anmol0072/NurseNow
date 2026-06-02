@@ -260,13 +260,14 @@ export default function AuthScreen({ navigation }: any) {
                 <Text style={styles.googleButtonText}>Continue with Google</Text>
               </TouchableOpacity>
 
-            </View>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>New to NurseGo? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Register', { role })}>
-                <Text style={styles.footerLink}>Create an Account</Text>
+              <TouchableOpacity 
+                style={styles.secondaryButton} 
+                activeOpacity={0.8} 
+                onPress={() => navigation.navigate('Register', { role })}
+              >
+                <Text style={styles.secondaryButtonText}>Create a New Account</Text>
               </TouchableOpacity>
+
             </View>
 
           </View>
@@ -435,25 +436,26 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 16,
   },
   googleButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  footer: {
-    flexDirection: 'row',
+  secondaryButton: {
+    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 32,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.5)',
+    backgroundColor: 'transparent',
   },
-  footerText: {
-    color: '#94a3b8',
-    fontSize: 14,
-  },
-  footerLink: {
+  secondaryButtonText: {
     color: '#14b8a6',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
   },
   toastContainer: {
     position: 'absolute',
