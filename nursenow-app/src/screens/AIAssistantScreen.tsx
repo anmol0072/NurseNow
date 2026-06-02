@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function AIAssistantScreen({ navigation }: any) {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { id: '1', text: 'Hi there! I am the NurseNow AI Triage Assistant. What symptoms are you experiencing today?', sender: 'AI', time: 'Just now' },
+    { id: '1', text: 'Hi there! I am the NurseGo AI Triage Assistant. What symptoms are you experiencing today?', sender: 'AI', time: 'Just now' },
   ]);
 
   const handleSend = () => {
@@ -49,7 +49,7 @@ export default function AIAssistantScreen({ navigation }: any) {
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <Ionicons name="sparkles" size={20} color="#fcd34d" style={{ marginRight: 8 }} />
-          <Text style={styles.headerTitle}>NurseNow AI</Text>
+          <Text style={styles.headerTitle}>NurseGo AI</Text>
         </View>
         <View style={{ width: 24 }} />
       </LinearGradient>

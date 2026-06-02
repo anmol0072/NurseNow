@@ -51,7 +51,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
             key: 'rzp_test_mockkey123456', // Test key (Razorpay will show an invalid key error but UI will load)
             amount: order.amount,
             currency: order.currency,
-            name: 'NurseNow Premium',
+            name: 'NurseGo Premium',
             description: `Payment for ${serviceName}`,
             image: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
             order_id: order.id,
@@ -62,7 +62,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
             },
             prefill: {
               name: 'John Doe',
-              email: 'patient@nursenow.com',
+              email: 'patient@nursego.com',
               contact: '9999999999'
             },
             theme: { color: '#0f766e' }

@@ -126,7 +126,7 @@ export default function AuthScreen({ navigation }: any) {
               <View style={styles.logoGlow}>
                 <Image source={require('../../assets/logo.jpeg')} style={styles.logo} resizeMode="cover" />
               </View>
-              <Text style={styles.brandName}>NurseNow</Text>
+              <Text style={styles.brandName}>NurseGo</Text>
               <Text style={styles.subtitle}>Elevating Healthcare Standards</Text>
             </View>
 
@@ -241,7 +241,7 @@ export default function AuthScreen({ navigation }: any) {
 
             {!otpSent && (
               <View style={styles.footer}>
-                <Text style={styles.footerText}>New to NurseNow? </Text>
+                <Text style={styles.footerText}>New to NurseGo? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate('Register', { role })}>
                   <Text style={styles.footerLink}>Create an Account</Text>
                 </TouchableOpacity>

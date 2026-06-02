@@ -30,7 +30,7 @@ export default function ReceiptScreen({ route, navigation }: any) {
 
         <View style={styles.receiptCard}>
           <View style={styles.receiptHeader}>
-            <Text style={styles.brandName}>NurseNow</Text>
+            <Text style={styles.brandName}>NurseGo</Text>
             <Text style={styles.receiptLabel}>DIGITAL RECEIPT</Text>
           </View>
 

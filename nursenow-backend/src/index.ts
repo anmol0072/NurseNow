@@ -14,7 +14,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentsRoutes);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'NurseNow API is running smoothly' });
+  res.json({ status: 'ok', message: 'NurseGo API is running smoothly' });
 });
 
 import https from 'https';

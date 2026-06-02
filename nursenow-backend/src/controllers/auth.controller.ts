@@ -45,8 +45,8 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
             body: JSON.stringify({
               from: 'onboarding@resend.dev',
               to: normalizedId,
-              subject: 'Your NurseNow Login OTP',
-              html: `<h3>Your NurseNow OTP is: <strong>${otp}</strong></h3><p>Please do not share this code with anyone.</p>`
+              subject: 'Your NurseGo Login OTP',
+              html: `<h3>Your NurseGo OTP is: <strong>${otp}</strong></h3><p>Please do not share this code with anyone.</p>`
             })
           });
 
@@ -67,7 +67,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         // MOCK EMAIL
         console.log(`\n======================================`);
         console.log(`📧 [MOCK EMAIL] To: ${normalizedId}`);
-        console.log(`✉️ Message: Your NurseNow OTP is ${otp}`);
+        console.log(`✉️ Message: Your NurseGo OTP is ${otp}`);
         console.log(`======================================\n`);
         res.json({ success: true, message: 'Mock Email OTP sent (Check Render Logs)' });
         return;
@@ -85,7 +85,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
           const formattedPhone = normalizedId.length === 10 ? `+91${normalizedId}` : normalizedId;
 
           await twilioClient.messages.create({
-            body: `Your NurseNow verification code is ${otp}. Please do not share this with anyone.`,
+            body: `Your NurseGo verification code is ${otp}. Please do not share this with anyone.`,
             from: TWILIO_PHONE_NUMBER,
             to: formattedPhone
           });
@@ -102,7 +102,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         // MOCK SMS
         console.log(`\n======================================`);
         console.log(`📱 [MOCK SMS] To: ${normalizedId}`);
-        console.log(`✉️ Message: Your NurseNow OTP is ${otp}`);
+        console.log(`✉️ Message: Your NurseGo OTP is ${otp}`);
         console.log(`======================================\n`);
         res.json({ success: true, message: 'Mock SMS OTP sent (Check Render Logs)' });
         return;
