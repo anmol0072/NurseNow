@@ -58,7 +58,9 @@ export default function NurseDashboard({ navigation }: any) {
           onPress={() => setProfileMenuVisible(true)}
           style={styles.profileButton}
         >
-          <Text style={styles.profileText}>{user?.name?.substring(0, 2).toUpperCase() || 'JD'}</Text>
+          <Text style={styles.profileText}>
+            {user?.name ? user.name.substring(0, 2).toUpperCase() : 'JD'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -66,7 +68,7 @@ export default function NurseDashboard({ navigation }: any) {
         
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.greeting}>Hi, {user?.name?.split(' ')[0] || 'Nurse'} 👋</Text>
+            <Text style={styles.greeting}>Hi, {user?.name ? user.name.split(' ')[0] : 'Nurse'} 👋</Text>
             <Text style={styles.subGreeting}>Ready to save lives today?</Text>
           </View>
           <View style={styles.statusToggle}>

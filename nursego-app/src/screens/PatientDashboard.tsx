@@ -143,10 +143,39 @@ export default function PatientDashboard({ navigation }: any) {
       if (status === window.google.maps.GeocoderStatus.OK && results[0]) {
         const location = results[0].geometry.location;
         mapInstanceRef.current.panTo(location);
-        mapInstanceRef.current.setZoom(15);
+        mapInstanceRef.current.setZoom(14);
         if (patientMarkerRef.current) {
           patientMarkerRef.current.setPosition(location);
         }
+
+        // Fetch Nearby Hospitals
+        // @ts-ignore
+        const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
+        service.nearbySearch(
+          {
+            location: location,
+            radius: 5000,
+            type: ['hospital']
+          },
+          (places: any, placesStatus: any) => {
+            // @ts-ignore
+            if (placesStatus === window.google.maps.places.PlacesServiceStatus.OK && places) {
+              places.forEach((place: any) => {
+                // @ts-ignore
+                new window.google.maps.Marker({
+                  position: place.geometry.location,
+                  map: mapInstanceRef.current,
+                  title: place.name,
+                  icon: {
+                    url: 'https://cdn-icons-png.flaticon.com/512/4320/4320350.png', // Hospital icon
+                    // @ts-ignore
+                    scaledSize: new window.google.maps.Size(35, 35)
+                  }
+                });
+              });
+            }
+          }
+        );
       }
     });
   };
@@ -210,7 +239,9 @@ export default function PatientDashboard({ navigation }: any) {
           onPress={() => setProfileMenuVisible(true)}
           style={styles.profileButton}
         >
-          <Text style={styles.profileText}>{user?.name?.substring(0, 2).toUpperCase() || 'JD'}</Text>
+          <Text style={styles.profileText}>
+            {user?.name ? user.name.substring(0, 2).toUpperCase() : 'JD'}
+          </Text>
         </TouchableOpacity>
       </View>
 
