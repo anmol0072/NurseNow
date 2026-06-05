@@ -77,7 +77,26 @@ export default function PatientDashboard({ navigation }: any) {
         });
         
         // @ts-ignore
-        patientMarkerRef.current = window.L.marker([28.6139, 77.2090], { icon: customIcon }).addTo(map);
+        patientMarkerRef.current = window.L.marker([28.6139, 77.2090], { icon: customIcon, draggable: true }).addTo(map);
+
+        patientMarkerRef.current.on('dragend', async (e: any) => {
+          const position = e.target.getLatLng();
+          mapInstanceRef.current.setView(position);
+          
+          try {
+            const res = await fetch(`https://photon.komoot.io/reverse?lon=${position.lng}&lat=${position.lat}`);
+            const data = await res.json();
+            let displayName = 'Selected Location';
+            if (data.features && data.features.length > 0) {
+               const props = data.features[0].properties;
+               displayName = [props.name, props.street, props.city].filter(Boolean).join(', ') || displayName;
+            }
+            selectPlace(position.lat.toString(), position.lng.toString(), displayName);
+          } catch(err) { 
+            console.log('Reverse geocode error', err);
+            selectPlace(position.lat.toString(), position.lng.toString(), 'Selected Location');
+          }
+        });
 
         // Dummy Nurses
         const nurses = [
@@ -128,9 +147,9 @@ export default function PatientDashboard({ navigation }: any) {
     
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(text)}&limit=5`);
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(text)}&limit=5`);
         const data = await res.json();
-        setPredictions(data);
+        setPredictions(data.features || []);
       } catch (e) {
         console.log('Search error:', e);
       }
@@ -228,12 +247,15 @@ export default function PatientDashboard({ navigation }: any) {
           
           {predictions.length > 0 && (
             <View style={styles.predictionsContainer}>
-              {predictions.map((p, idx) => (
-                <TouchableOpacity key={idx} style={styles.predictionItem} onPress={() => selectPlace(p.lat, p.lon, p.display_name)}>
-                  <Ionicons name="location-outline" size={20} color="#64748b" style={{marginRight: 8}}/>
-                  <Text style={styles.predictionText} numberOfLines={1}>{p.display_name}</Text>
-                </TouchableOpacity>
-              ))}
+              {predictions.map((p, idx) => {
+                const displayName = [p.properties.name, p.properties.street, p.properties.city, p.properties.state].filter(Boolean).join(', ');
+                return (
+                  <TouchableOpacity key={idx} style={styles.predictionItem} onPress={() => selectPlace(p.geometry.coordinates[1].toString(), p.geometry.coordinates[0].toString(), displayName)}>
+                    <Ionicons name="location-outline" size={20} color="#64748b" style={{marginRight: 8}}/>
+                    <Text style={styles.predictionText} numberOfLines={1}>{displayName}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
