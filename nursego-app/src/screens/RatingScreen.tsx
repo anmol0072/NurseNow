@@ -1,111 +1,137 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function RatingScreen({ navigation }: any) {
+  const insets = useSafeAreaInsets();
   const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [comment, setComment] = useState('');
 
   const handleSubmit = () => {
-    // Navigate back to Dashboard after rating
-    navigation.replace('Patient');
+    if (rating === 0) {
+      if (Platform.OS === 'web') window.alert('Please select a rating');
+      else Alert.alert('Error', 'Please select a rating');
+      return;
+    }
+    
+    if (Platform.OS === 'web') {
+      window.alert('Thank you for your feedback!');
+      navigation.navigate('PatientDashboard');
+    } else {
+      Alert.alert('Success', 'Thank you for your feedback!', [
+        { text: 'OK', onPress: () => navigation.navigate('PatientDashboard') }
+      ]);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatarGlow}>
-            <Text style={styles.avatarText}>S</Text>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 40) }]}>
+          
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
+            <Ionicons name="close" size={28} color="#94a3b8" />
+          </TouchableOpacity>
+
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>SA</Text>
+            </View>
+            <View style={styles.badge}>
+              <Ionicons name="checkmark-circle" size={16} color="#0f766e" />
+            </View>
           </View>
-        </View>
 
-        <Text style={styles.title}>Service Completed</Text>
-        <Text style={styles.subtitle}>How was your experience with Sarah?</Text>
+          <Text style={styles.title}>How was your experience?</Text>
+          <Text style={styles.subtitle}>Rate your nurse Sarah Adams</Text>
 
-        <View style={styles.starsContainer}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity key={star} onPress={() => setRating(star)} activeOpacity={0.7}>
-              <Ionicons 
-                name={rating >= star ? 'star' : 'star-outline'} 
-                size={48} 
-                color={rating >= star ? '#fbbf24' : '#cbd5e1'} 
-                style={styles.star}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
+          {/* Star Rating */}
+          <View style={styles.starsContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                <Ionicons 
+                  name={rating >= star ? "star" : "star-outline"} 
+                  size={48} 
+                  color={rating >= star ? "#fbbf24" : "#cbd5e1"} 
+                  style={styles.star}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <Text style={styles.ratingText}>
-          {rating === 1 && 'Terrible'}
-          {rating === 2 && 'Bad'}
-          {rating === 3 && 'Okay'}
-          {rating === 4 && 'Good'}
-          {rating === 5 && 'Excellent!'}
-          {rating === 0 && 'Tap a star to rate'}
-        </Text>
+          {/* Tip Section */}
+          <Text style={styles.sectionLabel}>Add a tip for Sarah</Text>
+          <View style={styles.tipsRow}>
+            {['₹50', '₹100', '₹200', 'Custom'].map((tip, idx) => (
+              <TouchableOpacity key={idx} style={styles.tipChip}>
+                <Text style={styles.tipText}>{tip}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
+          {/* Comment */}
+          <Text style={styles.sectionLabel}>Leave a compliment</Text>
+          <TextInput 
             style={styles.input}
-            placeholder="Leave a review (optional)"
+            placeholder="She was very professional and kind..."
             placeholderTextColor="#94a3b8"
             multiline
-            value={feedback}
-            onChangeText={setFeedback}
+            numberOfLines={4}
+            value={comment}
+            onChangeText={setComment}
           />
+
+        </ScrollView>
+
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+            <Text style={styles.submitBtnText}>Submit Feedback</Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity 
-          style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]} 
-          onPress={handleSubmit}
-          disabled={rating === 0}
-        >
-          <LinearGradient 
-            colors={rating > 0 ? ['#14b8a6', '#0f766e'] : ['#e2e8f0', '#cbd5e1']} 
-            style={styles.gradientBtn}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-          >
-            <Text style={[styles.submitBtnText, rating === 0 && { color: '#94a3b8' }]}>Submit Feedback</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleSubmit} style={styles.skipBtn}>
-          <Text style={styles.skipText}>Skip for now</Text>
-        </TouchableOpacity>
-
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f8fafc' },
-  container: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center', maxWidth: 500, width: '100%', alignSelf: 'center' },
-  
-  avatarContainer: { marginBottom: 32 },
-  avatarGlow: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#0f766e', alignItems: 'center', justifyContent: 'center', shadowColor: '#0f766e', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 10, borderWidth: 4, borderColor: '#ccfbf1' },
-  avatarText: { fontSize: 40, fontWeight: '900', color: '#fff' },
-
-  title: { fontSize: 32, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: '#64748b', fontWeight: '500', marginBottom: 40, textAlign: 'center' },
-
-  starsContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 16 },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  content: { padding: 24, alignItems: 'center' },
+  closeBtn: { alignSelf: 'flex-start', marginBottom: 20 },
+  avatarContainer: { marginBottom: 24, position: 'relative' },
+  avatar: {
+    width: 100, height: 100, borderRadius: 50,
+    backgroundColor: '#ccfbf1', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 4, borderColor: '#fff',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 8
+  },
+  avatarText: { fontSize: 36, fontWeight: '800', color: '#0f766e' },
+  badge: {
+    position: 'absolute', bottom: 4, right: 4,
+    backgroundColor: '#fff', borderRadius: 12, padding: 2
+  },
+  title: { fontSize: 28, fontWeight: '800', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
+  subtitle: { fontSize: 16, color: '#64748b', marginBottom: 40 },
+  starsContainer: { flexDirection: 'row', gap: 8, marginBottom: 40 },
   star: { marginHorizontal: 4 },
-  
-  ratingText: { fontSize: 18, fontWeight: '800', color: '#0f766e', marginBottom: 40, height: 24 },
-
-  inputContainer: { width: '100%', backgroundColor: '#fff', borderRadius: 20, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.02, shadowRadius: 10, elevation: 2, marginBottom: 32 },
-  input: { height: 120, padding: 20, paddingTop: 20, fontSize: 16, color: '#0f172a', textAlignVertical: 'top' },
-
-  submitBtn: { width: '100%', borderRadius: 16, shadowColor: '#0f766e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 15, elevation: 8 },
-  submitBtnDisabled: { shadowOpacity: 0, elevation: 0 },
-  gradientBtn: { width: '100%', paddingVertical: 18, alignItems: 'center', borderRadius: 16 },
-  submitBtnText: { color: '#fff', fontSize: 18, fontWeight: '800' },
-
-  skipBtn: { marginTop: 24, padding: 12 },
-  skipText: { color: '#64748b', fontWeight: '700', fontSize: 16 },
+  sectionLabel: { alignSelf: 'flex-start', fontSize: 16, fontWeight: '700', color: '#0f172a', marginBottom: 12 },
+  tipsRow: { flexDirection: 'row', gap: 12, marginBottom: 30, width: '100%' },
+  tipChip: {
+    flex: 1, paddingVertical: 12, borderRadius: 12,
+    borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center'
+  },
+  tipText: { fontSize: 16, fontWeight: '600', color: '#0f172a' },
+  input: {
+    width: '100%', height: 120,
+    backgroundColor: '#f8fafc', borderRadius: 16,
+    padding: 16, fontSize: 16, color: '#0f172a',
+    borderWidth: 1, borderColor: '#e2e8f0',
+    textAlignVertical: 'top'
+  },
+  footer: { paddingHorizontal: 24, paddingTop: 20 },
+  submitBtn: {
+    backgroundColor: '#0f766e', height: 56, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center'
+  },
+  submitBtnText: { color: '#fff', fontSize: 18, fontWeight: '700' }
 });

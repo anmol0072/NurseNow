@@ -34,6 +34,24 @@ export default function ProfileScreen({ navigation }: any) {
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Medical History</Text>
+          <View style={styles.medicalGrid}>
+            <View style={styles.medicalBox}>
+              <Text style={styles.medicalLabel}>Blood Type</Text>
+              <Text style={styles.medicalValue}>O+</Text>
+            </View>
+            <View style={styles.medicalBox}>
+              <Text style={styles.medicalLabel}>Allergies</Text>
+              <Text style={styles.medicalValue}>Penicillin</Text>
+            </View>
+            <View style={styles.medicalBox}>
+              <Text style={styles.medicalLabel}>Weight</Text>
+              <Text style={styles.medicalValue}>72 kg</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           
           <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('BookingHistory')}>
@@ -56,12 +74,12 @@ export default function ProfileScreen({ navigation }: any) {
             <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Payment')}>
             <View style={styles.menuItemLeft}>
               <View style={[styles.iconBox, { backgroundColor: '#fef3c7' }]}>
                 <Ionicons name="wallet-outline" size={20} color="#d97706" />
               </View>
-              <Text style={styles.menuItemText}>Payment Methods</Text>
+              <Text style={styles.menuItemText}>Payment Methods & Wallet</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
           </TouchableOpacity>
@@ -112,6 +130,11 @@ const styles = StyleSheet.create({
   section: { marginBottom: 32 },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
   
+  medicalGrid: { flexDirection: 'row', gap: 12 },
+  medicalBox: { flex: 1, backgroundColor: '#fff', padding: 16, borderRadius: 16, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 8, elevation: 1 },
+  medicalLabel: { fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4 },
+  medicalValue: { fontSize: 16, color: '#ef4444', fontWeight: '800' },
+
   menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 8, elevation: 1 },
   menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
   iconBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 16 },

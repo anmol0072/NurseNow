@@ -18,6 +18,8 @@ import AIAssistantScreen from './src/screens/AIAssistantScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import PaymentScreen from './src/screens/PaymentScreen';
+import RatingScreen from './src/screens/RatingScreen';
 import BookingHistoryScreen from './src/screens/BookingHistoryScreen';
 import FindingNurseScreen from './src/screens/FindingNurseScreen';
 
@@ -68,12 +70,13 @@ export default function App() {
         <Stack.Screen name="Receipt" component={ReceiptScreen} />
         <Stack.Screen name="Tracking" component={TrackingScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
-        <Stack.Screen name="Rating" component={RatingScreen} />
         <Stack.Screen name="AIAssistant" component={AIAssistantScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="BookingHistory" component={BookingHistoryScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Payment" component={PaymentScreen} />
+        <Stack.Screen name="Rating" component={RatingScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

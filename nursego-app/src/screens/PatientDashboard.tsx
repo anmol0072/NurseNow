@@ -298,6 +298,23 @@ export default function PatientDashboard({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      {/* Emergency SOS Button */}
+      <TouchableOpacity 
+        style={[styles.sosButton, { top: Math.max(insets.top, 80) + 120 }]} 
+        onPress={() => {
+          if (Platform.OS === 'web') {
+            window.alert('🚨 EMERGENCY SOS\\nCalling nearest ambulance to your location...');
+          } else {
+            Alert.alert('🚨 EMERGENCY SOS', 'Calling nearest ambulance to your location...', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Call Ambulance', style: 'destructive' }
+            ]);
+          }
+        }}
+      >
+        <Text style={styles.sosText}>SOS</Text>
+      </TouchableOpacity>
+
       {/* Live Tracking Card (Food Delivery Style) */}
       {isBooked && (
         <View style={[styles.trackingCard, { bottom: isMapExpanded ? 40 : 380 }]}>
@@ -371,13 +388,24 @@ export default function PatientDashboard({ navigation }: any) {
           })}
         </ScrollView>
 
-        <TouchableOpacity 
-          style={[styles.bookButton, !selectedService && styles.bookButtonDisabled]} 
-          onPress={handleBookNow}
-        >
-          <Text style={styles.bookButtonText}>Find Nearby Nurse</Text>
-          <Ionicons name="arrow-forward" size={20} color="#ffffff" style={{marginLeft: 8}} />
-        </TouchableOpacity>
+        <View style={styles.actionButtonsRow}>
+          <TouchableOpacity 
+            style={[styles.scheduleButton, !selectedService && styles.bookButtonDisabled]} 
+            onPress={() => {
+              if (Platform.OS === 'web') window.alert('Schedule Date/Time functionality coming soon');
+              else Alert.alert('Schedule Date', 'Select a date and time for the nurse to arrive.');
+            }}
+          >
+            <Ionicons name="calendar-outline" size={24} color="#0f766e" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.bookButton, !selectedService && styles.bookButtonDisabled, { flex: 1 }]} 
+            onPress={handleBookNow}
+          >
+            <Text style={styles.bookButtonText}>Find Nearby Nurse</Text>
+            <Ionicons name="arrow-forward" size={20} color="#ffffff" style={{marginLeft: 8}} />
+          </TouchableOpacity>
+        </View>
       </View>
       )}
 
@@ -435,6 +463,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
+  },
+  sosButton: {
+    position: 'absolute',
+    right: 20,
+    width: 48,
+    height: 48,
+    backgroundColor: '#ef4444',
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#ef4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 9,
+  },
+  sosText: {
+    color: '#fff',
+    fontWeight: '900',
+    fontSize: 14,
   },
   menuButton: {
     width: 48,
@@ -727,6 +776,21 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     backgroundColor: '#0f766e',
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  scheduleButton: {
+    width: 60,
+    height: 56,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   trackingActions: {
     flexDirection: 'row',
