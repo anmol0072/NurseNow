@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch, Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,18 +12,77 @@ export default function NurseDashboard({ navigation }: any) {
   const [locationSet, setLocationSet] = useState(false);
   const insets = useSafeAreaInsets();
   
+  const mapRef = useRef<View>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const nurseMarkerRef = useRef<any>(null);
+  
   // Menu States
   const [isSideMenuVisible, setSideMenuVisible] = useState(false);
   const [isProfileMenuVisible, setProfileMenuVisible] = useState(false);
   const [user, setUser] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadUser = async () => {
       const u = await AsyncStorage.getItem('user');
       if (u) setUser(JSON.parse(u));
     };
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && locationSet) {
+      const initMap = () => {
+        // @ts-ignore
+        if (!window.L) return;
+        const mapElement = mapRef.current as unknown as HTMLElement;
+        if (!mapElement) return;
+
+        // Prevent re-init
+        // @ts-ignore
+        if (mapElement._leaflet_id) return;
+
+        // @ts-ignore
+        const map = window.L.map(mapElement, {
+          zoomControl: false,
+          attributionControl: false
+        }).setView([28.6139, 77.2090], 14); // Default to New Delhi
+
+        // @ts-ignore
+        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+        }).addTo(map);
+        
+        mapInstanceRef.current = map;
+
+        // Add Nurse Marker
+        // @ts-ignore
+        const customIcon = window.L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
+          iconSize: [40, 40],
+          iconAnchor: [20, 40]
+        });
+        
+        // @ts-ignore
+        nurseMarkerRef.current = window.L.marker([28.6139, 77.2090], { icon: customIcon }).addTo(map);
+      };
+
+      // @ts-ignore
+      if (!window.L) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.async = true;
+        script.onload = initMap;
+        document.head.appendChild(script);
+      } else {
+        setTimeout(initMap, 100);
+      }
+    }
+  }, [locationSet]);
 
   // Mock function to simulate a patient booking a service
   const triggerMockJob = () => {
@@ -97,24 +156,24 @@ export default function NurseDashboard({ navigation }: any) {
         </View>
 
         {/* Map & Location Placeholder */}
-        <View style={styles.mapPlaceholder}>
-          <Text style={styles.mapIcon}>📍</Text>
-          {locationSet ? (
+        <View style={locationSet ? styles.mapActive : styles.mapPlaceholder} ref={mapRef}>
+          {!locationSet && (
             <>
-              <Text style={styles.mapText}>Broadcasting Location...</Text>
-              <Text style={styles.mapSubText}>Radius: 10km</Text>
-              <TouchableOpacity style={styles.testBtn} onPress={triggerMockJob}>
-                <Text style={styles.testBtnText}>Test Incoming Job</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
+              <Text style={styles.mapIcon}>📍</Text>
               <Text style={styles.mapText}>Location Not Set</Text>
               <Text style={styles.mapSubText}>You must set your location to receive jobs</Text>
               <TouchableOpacity style={[styles.testBtn, { backgroundColor: '#0f766e' }]} onPress={() => setLocationSet(true)}>
                 <Text style={styles.testBtnText}>Set Current Location</Text>
               </TouchableOpacity>
             </>
+          )}
+          {locationSet && (
+            <View style={styles.mapOverlayControls}>
+              <Text style={styles.mapOverlayText}>Broadcasting Location...</Text>
+              <TouchableOpacity style={styles.testBtnOverlay} onPress={triggerMockJob}>
+                <Text style={styles.testBtnText}>Test Incoming Job</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -188,12 +247,16 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 13, color: '#64748b', fontWeight: '700', marginBottom: 8 },
   statValue: { fontSize: 28, fontWeight: '900', color: '#0f766e' },
 
-  mapPlaceholder: { width: '100%', height: 200, backgroundColor: '#e2e8f0', borderRadius: 24, marginBottom: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#cbd5e1', borderStyle: 'dashed' },
+  mapPlaceholder: { width: '100%', height: 250, backgroundColor: '#e2e8f0', borderRadius: 24, marginBottom: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#cbd5e1', borderStyle: 'dashed' },
+  mapActive: { width: '100%', height: 250, borderRadius: 24, marginBottom: 24, overflow: 'hidden', backgroundColor: '#e2e8f0' },
   mapIcon: { fontSize: 32, marginBottom: 8 },
   mapText: { color: '#475569', fontWeight: '700', fontSize: 16 },
   mapSubText: { color: '#64748b', fontSize: 14, marginTop: 4 },
   testBtn: { marginTop: 16, backgroundColor: '#334155', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },
   testBtnText: { color: '#fff', fontWeight: 'bold' },
+  mapOverlayControls: { position: 'absolute', bottom: 16, left: 16, right: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.9)', padding: 12, borderRadius: 16, zIndex: 1000 },
+  mapOverlayText: { color: '#0f766e', fontWeight: '800', fontSize: 14 },
+  testBtnOverlay: { backgroundColor: '#0f172a', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
 
   alertCard: { backgroundColor: '#ffffff', borderRadius: 24, padding: 24, shadowColor: '#ef4444', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 8, borderWidth: 2, borderColor: '#fee2e2' },
   alertHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },

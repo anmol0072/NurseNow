@@ -22,10 +22,10 @@ export default function PatientDashboard({ navigation }: any) {
   // Location Selection States
   const [addressQuery, setAddressQuery] = useState('');
   const [predictions, setPredictions] = useState<any[]>([]);
-  const autocompleteServiceRef = useRef<any>(null);
-  const geocoderRef = useRef<any>(null);
   const mapInstanceRef = useRef<any>(null);
   const patientMarkerRef = useRef<any>(null);
+  const hospitalsLayerRef = useRef<any>(null);
+  const searchTimeoutRef = useRef<any>(null);
   
   // Menu States
   const [isSideMenuVisible, setSideMenuVisible] = useState(false);
@@ -47,67 +47,70 @@ export default function PatientDashboard({ navigation }: any) {
     if (Platform.OS === 'web') {
       const initMap = () => {
         // @ts-ignore
-        if (!window.google) return;
+        if (!window.L) return;
         const mapElement = mapRef.current as unknown as HTMLElement;
         if (!mapElement) return;
 
+        // Prevent re-initialization error
         // @ts-ignore
-        const map = new window.google.maps.Map(mapElement, {
-          center: { lat: 28.6139, lng: 77.2090 }, // New Delhi coordinates
-          zoom: 14,
-          disableDefaultUI: true,
-          styles: [
-            { "elementType": "geometry", "stylers": [{"color": "#f5f5f5"}] },
-            { "elementType": "labels.icon", "stylers": [{"visibility": "off"}] },
-            { "elementType": "labels.text.fill", "stylers": [{"color": "#616161"}] },
-            { "elementType": "labels.text.stroke", "stylers": [{"color": "#f5f5f5"}] },
-            { "featureType": "water", "elementType": "geometry", "stylers": [{"color": "#c9c9c9"}] }
-          ]
-        });
+        if (mapElement._leaflet_id) return;
+
+        // @ts-ignore
+        const map = window.L.map(mapElement, {
+          zoomControl: false,
+          attributionControl: false
+        }).setView([28.6139, 77.2090], 14); // New Delhi
+
+        // @ts-ignore
+        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+        }).addTo(map);
         
         mapInstanceRef.current = map;
-        // @ts-ignore
-        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        // @ts-ignore
-        geocoderRef.current = new window.google.maps.Geocoder();
 
         // Add Patient Marker
         // @ts-ignore
-        patientMarkerRef.current = new window.google.maps.Marker({
-          position: { lat: 28.6139, lng: 77.2090 },
-          map,
-          icon: { url: 'https://cdn-icons-png.flaticon.com/512/25/25694.png', scaledSize: new window.google.maps.Size(30, 30) }
+        const customIcon = window.L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/25/25694.png',
+          iconSize: [30, 30],
+          iconAnchor: [15, 30]
         });
+        
+        // @ts-ignore
+        patientMarkerRef.current = window.L.marker([28.6139, 77.2090], { icon: customIcon }).addTo(map);
 
-        // Add 3 dummy nurse markers around the location
+        // Dummy Nurses
         const nurses = [
-          { lat: 28.6150, lng: 77.2100 },
-          { lat: 28.6110, lng: 77.2050 },
-          { lat: 28.6170, lng: 77.2150 }
+          [28.6150, 77.2100],
+          [28.6110, 77.2050],
+          [28.6170, 77.2150]
         ];
+
+        // @ts-ignore
+        const nurseIcon = window.L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
+          iconSize: [40, 40],
+          iconAnchor: [20, 40]
+        });
 
         nurses.forEach(coord => {
           // @ts-ignore
-          new window.google.maps.Marker({
-            position: coord,
-            map,
-            icon: {
-              url: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
-              // @ts-ignore
-              scaledSize: new window.google.maps.Size(40, 40)
-            }
-          });
+          window.L.marker(coord, { icon: nurseIcon }).addTo(map);
         });
       };
 
       // @ts-ignore
-      if (!window.google || !window.google.maps.places) {
+      if (!window.L) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAEJ6oMNsGwveIlwNLlCVbw4DzcNGNzBl4&libraries=places`;
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
         script.async = true;
-        script.defer = true;
         script.onload = initMap;
-        document.body.appendChild(script);
+        document.head.appendChild(script);
       } else {
         initMap();
       }
@@ -116,68 +119,68 @@ export default function PatientDashboard({ navigation }: any) {
 
   const handleSearch = (text: string) => {
     setAddressQuery(text);
-    if (!text || !autocompleteServiceRef.current) {
+    if (!text || text.length < 3) {
       setPredictions([]);
       return;
     }
-    autocompleteServiceRef.current.getPlacePredictions(
-      { input: text },
-      (results: any, status: any) => {
-        // @ts-ignore
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(results);
-        } else {
-          setPredictions([]);
-        }
+    
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(text)}&limit=5`);
+        const data = await res.json();
+        setPredictions(data);
+      } catch (e) {
+        console.log('Search error:', e);
       }
-    );
+    }, 500);
   };
 
-  const selectPlace = (placeId: string, description: string) => {
-    setAddressQuery(description);
+  const selectPlace = async (lat: string, lon: string, displayName: string) => {
+    setAddressQuery(displayName);
     setPredictions([]);
-    if (!geocoderRef.current || !mapInstanceRef.current) return;
+    
+    if (!mapInstanceRef.current) return;
+    
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
 
-    geocoderRef.current.geocode({ placeId }, (results: any, status: any) => {
-      // @ts-ignore
-      if (status === window.google.maps.GeocoderStatus.OK && results[0]) {
-        const location = results[0].geometry.location;
-        mapInstanceRef.current.panTo(location);
-        mapInstanceRef.current.setZoom(14);
-        if (patientMarkerRef.current) {
-          patientMarkerRef.current.setPosition(location);
-        }
+    mapInstanceRef.current.setView([latNum, lonNum], 14);
+    if (patientMarkerRef.current) {
+      patientMarkerRef.current.setLatLng([latNum, lonNum]);
+    }
 
-        // Fetch Nearby Hospitals
-        // @ts-ignore
-        const service = new window.google.maps.places.PlacesService(mapInstanceRef.current);
-        service.nearbySearch(
-          {
-            location: location,
-            radius: 5000,
-            type: ['hospital']
-          },
-          (places: any, placesStatus: any) => {
-            // @ts-ignore
-            if (placesStatus === window.google.maps.places.PlacesServiceStatus.OK && places) {
-              places.forEach((place: any) => {
-                // @ts-ignore
-                new window.google.maps.Marker({
-                  position: place.geometry.location,
-                  map: mapInstanceRef.current,
-                  title: place.name,
-                  icon: {
-                    url: 'https://cdn-icons-png.flaticon.com/512/4320/4320350.png', // Hospital icon
-                    // @ts-ignore
-                    scaledSize: new window.google.maps.Size(35, 35)
-                  }
-                });
-              });
-            }
-          }
-        );
+    // Fetch Nearby Hospitals via Overpass API
+    try {
+      const query = `[out:json];node(around:5000,${latNum},${lonNum})[amenity=hospital];out 10;`;
+      const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      
+      // Clear old hospitals
+      if (hospitalsLayerRef.current) {
+        mapInstanceRef.current.removeLayer(hospitalsLayerRef.current);
       }
-    });
+      
+      // @ts-ignore
+      hospitalsLayerRef.current = window.L.layerGroup().addTo(mapInstanceRef.current);
+      
+      // @ts-ignore
+      const hospitalIcon = window.L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/4320/4320350.png',
+        iconSize: [35, 35],
+        iconAnchor: [17, 35]
+      });
+
+      data.elements.forEach((hospital: any) => {
+        // @ts-ignore
+        window.L.marker([hospital.lat, hospital.lon], { icon: hospitalIcon })
+          .bindPopup(hospital.tags?.name || 'Hospital')
+          .addTo(hospitalsLayerRef.current);
+      });
+    } catch (e) {
+      console.log('Hospital fetch error:', e);
+    }
   };
 
   const handleBookNow = () => {
@@ -226,9 +229,9 @@ export default function PatientDashboard({ navigation }: any) {
           {predictions.length > 0 && (
             <View style={styles.predictionsContainer}>
               {predictions.map((p, idx) => (
-                <TouchableOpacity key={idx} style={styles.predictionItem} onPress={() => selectPlace(p.place_id, p.description)}>
+                <TouchableOpacity key={idx} style={styles.predictionItem} onPress={() => selectPlace(p.lat, p.lon, p.display_name)}>
                   <Ionicons name="location-outline" size={20} color="#64748b" style={{marginRight: 8}}/>
-                  <Text style={styles.predictionText} numberOfLines={1}>{p.description}</Text>
+                  <Text style={styles.predictionText} numberOfLines={1}>{p.display_name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -243,6 +246,29 @@ export default function PatientDashboard({ navigation }: any) {
             {user?.name ? user.name.substring(0, 2).toUpperCase() : 'JD'}
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Live Tracking Card (Food Delivery Style) */}
+      <View style={[styles.trackingCard, { bottom: 380 }]}>
+        <View style={styles.trackingHeader}>
+          <View>
+            <Text style={styles.trackingTitle}>Nurse Sarah is on the way!</Text>
+            <Text style={styles.trackingSubtitle}>Arriving in 12 mins • 3.2 km away</Text>
+          </View>
+          <View style={styles.pulsingDot}>
+            <View style={styles.pulsingCore} />
+          </View>
+        </View>
+        <View style={styles.trackingActions}>
+          <TouchableOpacity style={styles.trackingCallBtn}>
+            <Ionicons name="call" size={16} color="#fff" />
+            <Text style={styles.trackingCallText}>Call</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.trackingMsgBtn}>
+            <Ionicons name="chatbubble" size={16} color="#0f766e" />
+            <Text style={styles.trackingMsgText}>Message</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Bottom Sheet */}
@@ -582,4 +608,84 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
+  trackingCard: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 20,
+    shadowColor: '#0f766e',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#f0fdfa',
+  },
+  trackingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  trackingTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  trackingSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f766e',
+  },
+  pulsingDot: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(20, 184, 166, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulsingCore: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#0f766e',
+  },
+  trackingActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  trackingCallBtn: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  trackingCallText: {
+    color: '#fff',
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  trackingMsgBtn: {
+    flex: 1,
+    backgroundColor: '#f0fdfa',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ccfbf1',
+  },
+  trackingMsgText: {
+    color: '#0f766e',
+    fontWeight: '700',
+    marginLeft: 8,
+  }
 });
