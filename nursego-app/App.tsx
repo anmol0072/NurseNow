@@ -12,7 +12,6 @@ import RegistrationScreen from './src/screens/RegistrationScreen';
 import CheckoutScreen from './src/screens/CheckoutScreen';
 import ReceiptScreen from './src/screens/ReceiptScreen';
 import ChatScreen from './src/screens/ChatScreen';
-import RatingScreen from './src/screens/RatingScreen';
 import TrackingScreen from './src/screens/TrackingScreen';
 import AIAssistantScreen from './src/screens/AIAssistantScreen';
 import ProfileScreen from './src/screens/ProfileScreen';

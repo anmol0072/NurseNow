@@ -154,8 +154,8 @@ export default function TrackingScreen({ route, navigation }: any) {
               <Ionicons name="call" size={24} color="#0f766e" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Receipt', route?.params || {})}>
-              <Text style={styles.primaryButtonText}>Finish Trip & Receipt</Text>
+            <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Rating', route?.params || {})}>
+              <Text style={styles.primaryButtonText}>Finish Service</Text>
             </TouchableOpacity>
           </View>
         </View>

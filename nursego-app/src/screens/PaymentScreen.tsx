@@ -3,16 +3,27 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Pla
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function PaymentScreen({ navigation }: any) {
+export default function PaymentScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
   const [selectedMethod, setSelectedMethod] = useState('upi');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // If accessed from Profile, route.params might be undefined
+  const { total = 0, serviceName = 'Wallet Top-up' } = route?.params || {};
+  const isCheckoutFlow = total > 0;
 
   const handlePay = () => {
-    if (Platform.OS === 'web') {
-      window.alert('Payment processing simulated successfully.');
-    } else {
-      Alert.alert('Success', 'Payment processed successfully.');
-    }
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      if (isCheckoutFlow) {
+        navigation.replace('Tracking', { serviceName, total, paymentMethod: selectedMethod });
+      } else {
+        if (Platform.OS === 'web') window.alert('Wallet updated!');
+        else Alert.alert('Success', 'Wallet updated successfully!');
+        navigation.goBack();
+      }
+    }, 1500);
   };
 
   return (
@@ -92,16 +103,32 @@ export default function PaymentScreen({ navigation }: any) {
 
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-        <View style={styles.footerRow}>
-          <Text style={styles.totalLabel}>Total to Pay</Text>
-          <Text style={styles.totalAmount}>₹ 499.00</Text>
+      {isCheckoutFlow ? (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <View style={styles.footerRow}>
+            <Text style={styles.totalLabel}>Total to Pay</Text>
+            <Text style={styles.totalAmount}>₹ {total.toFixed(2)}</Text>
+          </View>
+          <TouchableOpacity 
+            style={[styles.payButton, isProcessing && {opacity: 0.7}]} 
+            onPress={handlePay}
+            disabled={isProcessing}
+          >
+            <Text style={styles.payButtonText}>{isProcessing ? 'Processing...' : 'Proceed to Pay'}</Text>
+            {!isProcessing && <Ionicons name="lock-closed" size={16} color="#fff" style={{marginLeft: 8}} />}
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.payButton} onPress={handlePay}>
-          <Text style={styles.payButtonText}>Proceed to Pay</Text>
-          <Ionicons name="lock-closed" size={16} color="#fff" style={{marginLeft: 8}} />
-        </TouchableOpacity>
-      </View>
+      ) : (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <TouchableOpacity 
+            style={[styles.payButton, isProcessing && {opacity: 0.7}]} 
+            onPress={handlePay}
+            disabled={isProcessing}
+          >
+            <Text style={styles.payButtonText}>{isProcessing ? 'Processing...' : 'Save Default Payment Method'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

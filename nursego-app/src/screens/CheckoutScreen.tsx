@@ -16,101 +16,11 @@ export default function CheckoutScreen({ route, navigation }: any) {
   const [tipAmount, setTipAmount] = useState<number>(0);
   const total = subtotal + gst + tipAmount;
 
-  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CARD' | 'CASH'>('UPI');
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handlePayment = async () => {
-    if (paymentMethod === 'CASH') {
-      setIsProcessing(true);
-      setTimeout(() => {
-        setIsProcessing(false);
-        navigation.replace('Tracking', { serviceName, total, paymentMethod });
-      }, 1500);
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // 1. Fetch Order ID from backend
-      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${BASE_URL}/api/payments/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total })
-      });
-      const order = await response.json();
-
-      // 2. Initialize Razorpay (Web integration)
-      if (Platform.OS === 'web') {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        
-        script.onload = () => {
-          const options = {
-            key: 'rzp_test_mockkey123456', // Test key (Razorpay will show an invalid key error but UI will load)
-            amount: order.amount,
-            currency: order.currency,
-            name: 'NurseGo Premium',
-            description: `Payment for ${serviceName}`,
-            image: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
-            order_id: order.id,
-            handler: function (response: any) {
-              // Success callback
-              setIsProcessing(false);
-              navigation.replace('Tracking', { serviceName, total, paymentMethod });
-            },
-            prefill: {
-              name: 'John Doe',
-              email: 'patient@nursego.com',
-              contact: '9999999999'
-            },
-            theme: { color: '#0f766e' }
-          };
-
-          // @ts-ignore
-          const rzp = new window.Razorpay(options);
-          
-          rzp.on('payment.failed', function (response: any){
-            // For Demo purposes, if payment fails (due to fake key), we proceed to tracking anyway
-            console.log("Razorpay Error:", response.error);
-            setIsProcessing(false);
-            navigation.replace('Tracking', { serviceName, total, paymentMethod });
-          });
-
-          rzp.open();
-        };
-        
-        script.onerror = () => {
-           setIsProcessing(false);
-           navigation.replace('Tracking', { serviceName, total, paymentMethod });
-        };
-        
-        document.body.appendChild(script);
-      } else {
-        // Native mobile integration fallback
-        setTimeout(() => {
-          setIsProcessing(false);
-          navigation.replace('Tracking', { serviceName, total, paymentMethod });
-        }, 1500);
-      }
-
-    } catch (error) {
-      console.error('Checkout error:', error);
-      setIsProcessing(false);
-      Alert.alert("Error", "Failed to contact payment gateway.");
-    }
+  const handleContinueToPayment = () => {
+    navigation.navigate('Payment', { total, serviceName });
   };
 
-  if (isProcessing) {
-    return (
-      <View style={styles.processingContainer}>
-        <ActivityIndicator size="large" color="#0f766e" />
-        <Text style={styles.processingText}>Processing Payment securely...</Text>
-        <Text style={styles.processingSub}>Connecting to payment gateway</Text>
-      </View>
-    );
-  }
+  // Removed processing overlay since payment is moved to PaymentScreen
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -188,42 +98,6 @@ export default function CheckoutScreen({ route, navigation }: any) {
           ))}
         </View>
 
-        {/* Payment Methods */}
-        <Text style={styles.sectionTitle}>Select Payment Method</Text>
-        
-        <TouchableOpacity 
-          style={[styles.paymentOption, paymentMethod === 'UPI' && styles.paymentOptionActive]} 
-          onPress={() => {setPaymentMethod('UPI'); setShowCardInput(false);}}
-        >
-          <View style={styles.paymentIconContainer}>
-            <Ionicons name="qr-code-outline" size={24} color={paymentMethod === 'UPI' ? '#0f766e' : '#64748b'} />
-          </View>
-          <Text style={[styles.paymentText, paymentMethod === 'UPI' && styles.paymentTextActive]}>UPI (GPay, PhonePe)</Text>
-          {paymentMethod === 'UPI' && <Ionicons name="checkmark-circle" size={24} color="#0f766e" />}
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.paymentOption, paymentMethod === 'CARD' && styles.paymentOptionActive]} 
-          onPress={() => setPaymentMethod('CARD')}
-        >
-          <View style={styles.paymentIconContainer}>
-            <Ionicons name="card-outline" size={24} color={paymentMethod === 'CARD' ? '#0f766e' : '#64748b'} />
-          </View>
-          <Text style={[styles.paymentText, paymentMethod === 'CARD' && styles.paymentTextActive]}>Credit / Debit Card</Text>
-          {paymentMethod === 'CARD' && <Ionicons name="checkmark-circle" size={24} color="#0f766e" />}
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.paymentOption, paymentMethod === 'CASH' && styles.paymentOptionActive]} 
-          onPress={() => setPaymentMethod('CASH')}
-        >
-          <View style={styles.paymentIconContainer}>
-            <Ionicons name="cash-outline" size={24} color={paymentMethod === 'CASH' ? '#0f766e' : '#64748b'} />
-          </View>
-          <Text style={[styles.paymentText, paymentMethod === 'CASH' && styles.paymentTextActive]}>Cash on Delivery</Text>
-          {paymentMethod === 'CASH' && <Ionicons name="checkmark-circle" size={24} color="#0f766e" />}
-        </TouchableOpacity>
-
       </ScrollView>
 
       {/* Sticky Footer */}
@@ -232,9 +106,9 @@ export default function CheckoutScreen({ route, navigation }: any) {
           <Text style={styles.footerTotalLabel}>Total Pay</Text>
           <Text style={styles.footerTotalPrice}>₹{total.toFixed(2)}</Text>
         </View>
-        <TouchableOpacity onPress={handlePayment} activeOpacity={0.8}>
+        <TouchableOpacity onPress={handleContinueToPayment} activeOpacity={0.8}>
           <LinearGradient colors={['#14b8a6', '#0f766e']} style={styles.payBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-            <Text style={styles.payBtnText}>Proceed to Razorpay</Text>
+            <Text style={styles.payBtnText}>Continue to Payment</Text>
             <Ionicons name="chevron-forward" size={20} color="#fff" />
           </LinearGradient>
         </TouchableOpacity>
