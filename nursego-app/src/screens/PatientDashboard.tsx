@@ -193,11 +193,19 @@ export default function PatientDashboard({ navigation }: any) {
       // @ts-ignore
       hospitalsLayerRef.current = window.L.layerGroup().addTo(mapInstanceRef.current);
       
+      const hospitalSvg = encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="#ef4444" stroke="#ffffff" stroke-width="5"/>
+          <rect x="40" y="25" width="20" height="50" fill="#ffffff" rx="2"/>
+          <rect x="25" y="40" width="50" height="20" fill="#ffffff" rx="2"/>
+        </svg>
+      `);
+
       // @ts-ignore
       const hospitalIcon = window.L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
+        iconUrl: `data:image/svg+xml;charset=utf-8,${hospitalSvg}`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
         className: 'hospital-marker'
       });
 
