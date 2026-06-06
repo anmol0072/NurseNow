@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +14,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
   const gst = subtotal * 0.18;
   
   const [tipAmount, setTipAmount] = useState<number>(0);
+  const [showBiodata, setShowBiodata] = useState(false);
   const total = subtotal + gst + tipAmount;
 
   const handleContinueToPayment = () => {
@@ -35,23 +36,22 @@ export default function CheckoutScreen({ route, navigation }: any) {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         
         {/* Nurse Profile Card */}
-        <View style={styles.nurseCard}>
+        <TouchableOpacity style={styles.nurseCard} activeOpacity={0.9} onPress={() => setShowBiodata(true)}>
           <View style={styles.nurseHeader}>
-            <View style={styles.nurseAvatar}>
-              <Text style={{color: '#fff', fontWeight: 'bold'}}>AJ</Text>
-            </View>
+            <Image source={{uri: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200&h=200'}} style={styles.nurseAvatarImg} />
             <View>
               <Text style={styles.nurseName}>Asha Johnson</Text>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Ionicons name="star" size={14} color="#f59e0b" />
                 <Text style={styles.nurseRating}> 4.9 (120+ trips)</Text>
               </View>
+              <Text style={styles.viewBiodataText}>Tap to view biodata</Text>
             </View>
           </View>
           <View style={styles.etaBadge}>
             <Text style={styles.etaText}>4 MINS AWAY</Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Bill Breakdown Card */}
         <View style={styles.card}>
@@ -113,6 +113,73 @@ export default function CheckoutScreen({ route, navigation }: any) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      {/* Nurse Biodata Modal */}
+      <Modal visible={showBiodata} animationType="slide" transparent={true} onRequestClose={() => setShowBiodata(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity style={styles.closeModalBtn} onPress={() => setShowBiodata(false)}>
+              <Ionicons name="close" size={24} color="#64748b" />
+            </TouchableOpacity>
+
+            <Image source={{uri: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400&h=400'}} style={styles.modalAvatar} />
+            
+            <View style={styles.modalTitleRow}>
+              <Text style={styles.modalName}>Asha Johnson</Text>
+              <Ionicons name="checkmark-circle" size={24} color="#1d4ed8" />
+            </View>
+            <Text style={styles.modalRole}>Senior IV & Critical Care Nurse</Text>
+
+            <View style={styles.statsGrid}>
+              <View style={styles.statBox}>
+                <Text style={styles.statBoxValue}>8 Yrs</Text>
+                <Text style={styles.statBoxLabel}>Experience</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statBoxValue}>4.9 ⭐</Text>
+                <Text style={styles.statBoxLabel}>Rating</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statBoxValue}>120+</Text>
+                <Text style={styles.statBoxLabel}>Visits</Text>
+              </View>
+            </View>
+
+            <ScrollView style={styles.bioScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.bioSectionTitle}>About Asha</Text>
+              <Text style={styles.bioText}>
+                Asha is a highly trained critical care nurse specializing in intravenous therapies, post-operative care, and geriatric support. She has a pristine record of delivering painless and compassionate care directly to patients' homes.
+              </Text>
+
+              <Text style={styles.bioSectionTitle}>Languages Spoken</Text>
+              <View style={styles.tagsContainer}>
+                <View style={styles.tag}><Text style={styles.tagText}>English</Text></View>
+                <View style={styles.tag}><Text style={styles.tagText}>Hindi</Text></View>
+                <View style={styles.tag}><Text style={styles.tagText}>Tamil</Text></View>
+              </View>
+
+              <Text style={styles.bioSectionTitle}>Credentials & Verification</Text>
+              <View style={styles.credentialRow}>
+                <Ionicons name="shield-checkmark" size={20} color="#10b981" />
+                <Text style={styles.credentialText}>Background Check Passed</Text>
+              </View>
+              <View style={styles.credentialRow}>
+                <Ionicons name="medkit" size={20} color="#1d4ed8" />
+                <Text style={styles.credentialText}>B.Sc. Nursing (AIIMS Delhi)</Text>
+              </View>
+              <View style={styles.credentialRow}>
+                <Ionicons name="document-text" size={20} color="#f59e0b" />
+                <Text style={styles.credentialText}>State Medical Council Registered</Text>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity style={styles.modalPrimaryBtn} onPress={() => setShowBiodata(false)}>
+              <Text style={styles.modalPrimaryBtnText}>Close Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -127,9 +194,10 @@ const styles = StyleSheet.create({
   
   nurseCard: { backgroundColor: '#1d4ed8', borderRadius: 20, padding: 20, marginBottom: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#1d4ed8', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6 },
   nurseHeader: { flexDirection: 'row', alignItems: 'center' },
-  nurseAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#eff6ff', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 2, borderColor: '#fff' },
+  nurseAvatarImg: { width: 50, height: 50, borderRadius: 25, marginRight: 12, borderWidth: 2, borderColor: '#fff' },
   nurseName: { fontSize: 18, fontWeight: '800', color: '#fff', marginBottom: 2 },
   nurseRating: { fontSize: 14, color: '#eff6ff', fontWeight: '600' },
+  viewBiodataText: { fontSize: 11, color: '#93c5fd', marginTop: 4, fontWeight: '600', textDecorationLine: 'underline' },
   etaBadge: { backgroundColor: '#eff6ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   etaText: { color: '#1d4ed8', fontWeight: '900', fontSize: 12 },
 
@@ -167,5 +235,27 @@ const styles = StyleSheet.create({
 
   processingContainer: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   processingText: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginTop: 24 },
-  processingSub: { fontSize: 15, color: '#94a3b8', marginTop: 8 }
+  processingSub: { fontSize: 15, color: '#94a3b8', marginTop: 8 },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, maxHeight: '85%' },
+  closeModalBtn: { position: 'absolute', top: 24, right: 24, zIndex: 10, padding: 8, backgroundColor: '#f1f5f9', borderRadius: 20 },
+  modalAvatar: { width: 100, height: 100, borderRadius: 50, alignSelf: 'center', marginTop: 10, marginBottom: 16, borderWidth: 3, borderColor: '#eff6ff' },
+  modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  modalName: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginRight: 6 },
+  modalRole: { fontSize: 15, color: '#64748b', textAlign: 'center', fontWeight: '600', marginBottom: 24 },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, backgroundColor: '#f8fafc', borderRadius: 16, padding: 16 },
+  statBox: { alignItems: 'center', flex: 1 },
+  statBoxValue: { fontSize: 18, fontWeight: '900', color: '#1d4ed8', marginBottom: 4 },
+  statBoxLabel: { fontSize: 12, color: '#64748b', fontWeight: '600' },
+  bioScroll: { marginBottom: 20 },
+  bioSectionTitle: { fontSize: 16, fontWeight: '800', color: '#334155', marginBottom: 8, marginTop: 16 },
+  bioText: { fontSize: 14, color: '#475569', lineHeight: 22, fontWeight: '500' },
+  tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  tag: { backgroundColor: '#eff6ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#bfdbfe' },
+  tagText: { color: '#1d4ed8', fontWeight: '700', fontSize: 13 },
+  credentialRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, backgroundColor: '#f8fafc', padding: 12, borderRadius: 12 },
+  credentialText: { fontSize: 14, fontWeight: '600', color: '#334155', marginLeft: 12 },
+  modalPrimaryBtn: { backgroundColor: '#0f172a', paddingVertical: 18, borderRadius: 16, alignItems: 'center' },
+  modalPrimaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' }
 });
