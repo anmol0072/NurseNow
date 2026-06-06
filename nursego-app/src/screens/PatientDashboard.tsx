@@ -100,6 +100,9 @@ export default function PatientDashboard({ navigation }: any) {
               value={destination}
               onChangeText={setDestination}
             />
+            <TouchableOpacity style={styles.setLocationBtn} onPress={() => {}}>
+              <Text style={styles.setLocationBtnText}>Search</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -288,11 +291,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f8fafc',
-    height: 48,
+    height: 52,
     borderRadius: 12,
-    paddingHorizontal: 16,
+    paddingLeft: 16,
+    paddingRight: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  setLocationBtn: {
+    backgroundColor: '#1d4ed8',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  setLocationBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
   },
   searchSection: {
     flexDirection: 'row',
