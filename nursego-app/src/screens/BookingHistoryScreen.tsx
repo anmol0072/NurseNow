@@ -56,32 +56,33 @@ export default function BookingHistoryScreen({ navigation }: any) {
       
       <View style={styles.divider} />
       
-      <View style={styles.cardFooter}>
-        <View style={styles.nurseInfo}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{item.nurseName.charAt(0)}</Text>
-          </View>
-          <View>
-            <Text style={styles.nurseName}>{item.nurseName}</Text>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Ionicons name="star" size={12} color="#f59e0b" />
-              <Text style={styles.nurseRating}> {item.nurseRating}</Text>
-            </View>
-          </View>
+      <View style={styles.nurseInfo}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{item.nurseName.charAt(0)}</Text>
         </View>
-        <TouchableOpacity style={styles.receiptButton} onPress={() => navigation.navigate('Receipt', { serviceName: item.service, total: item.amount, paymentMethod: 'UPI' })}>
-          <Text style={styles.receiptText}>Receipt</Text>
-          <Ionicons name="chevron-forward" size={16} color="#0f766e" />
+        <View>
+          <Text style={styles.nurseLabel}>Nurse:</Text>
+          <Text style={styles.nurseName}>{item.nurseName}</Text>
+        </View>
+      </View>
+
+      <View style={styles.actionRow}>
+        <TouchableOpacity style={styles.viewReceiptBtn} onPress={() => navigation.navigate('Receipt', { serviceName: item.service, total: item.amount, paymentMethod: 'UPI' })}>
+          <Ionicons name="receipt-outline" size={16} color="#2563eb" />
+          <Text style={styles.viewReceiptText}>View Receipt</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.rebookBtn} onPress={() => navigation.navigate('PatientDashboard', { preselectService: item.service })}>
+          <Text style={styles.rebookText}>Rebook</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: Math.max(50, 20) }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#0f172a" />
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Bookings</Text>
         <View style={{ width: 24 }} />
@@ -94,7 +95,7 @@ export default function BookingHistoryScreen({ navigation }: any) {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -108,19 +109,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    paddingTop: 20,
+    paddingBottom: 24,
+    backgroundColor: '#1d4ed8',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   backBtn: {
     padding: 8,
     marginLeft: -8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#0f172a',
+    color: '#ffffff',
   },
   listContent: {
     padding: 20,
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0f766e',
+    color: '#1d4ed8',
   },
   statusText: {
     fontSize: 12,
@@ -175,20 +177,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     marginVertical: 16,
   },
-  cardFooter: {
+  actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 16,
   },
   nurseInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 4,
+  },
+  nurseLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '500',
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#0f766e',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#3b82f6',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -196,29 +205,32 @@ const styles = StyleSheet.create({
   avatarText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 14,
   },
   nurseName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     color: '#334155',
   },
-  nurseRating: {
-    fontSize: 13,
-    color: '#64748b',
-    fontWeight: '600',
-  },
-  receiptButton: {
+  viewReceiptBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
   },
-  receiptText: {
-    color: '#0f766e',
+  viewReceiptText: {
+    color: '#2563eb',
     fontWeight: '700',
-    marginRight: 4,
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  rebookBtn: {
+    backgroundColor: '#0f172a',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  rebookText: {
+    color: '#ffffff',
+    fontWeight: '700',
+    fontSize: 14,
   }
 });

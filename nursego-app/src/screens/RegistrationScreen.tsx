@@ -231,7 +231,7 @@ export default function RegistrationScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f0fdfa', 
+    backgroundColor: '#eff6ff', 
   },
   container: {
     flex: 1,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   backButtonText: {
-    color: '#0f766e',
+    color: '#1d4ed8',
     fontWeight: '700',
     fontSize: 16,
   },
@@ -312,12 +312,12 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
   },
   primaryButton: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#1d4ed8',
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     marginTop: 12,
-    shadowColor: '#0f766e',
+    shadowColor: '#1d4ed8',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -343,8 +343,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   genderButtonActive: {
-    backgroundColor: '#0f766e',
-    borderColor: '#0f766e',
+    backgroundColor: '#1d4ed8',
+    borderColor: '#1d4ed8',
   },
   genderText: {
     fontSize: 15,

@@ -86,7 +86,7 @@ export default function PaymentScreen({ route, navigation }: any) {
           onPress={() => setSelectedMethod('upi')}
         >
           <View style={styles.methodIconBox}>
-            <Ionicons name="qr-code-outline" size={24} color="#0f766e" />
+            <Ionicons name="qr-code-outline" size={24} color="#1d4ed8" />
           </View>
           <View style={styles.methodInfo}>
             <Text style={styles.methodTitle}>UPI (GPay, PhonePe, Paytm)</Text>
@@ -103,7 +103,7 @@ export default function PaymentScreen({ route, navigation }: any) {
           onPress={() => setSelectedMethod('card')}
         >
           <View style={styles.methodIconBox}>
-            <Ionicons name="card-outline" size={24} color="#0f766e" />
+            <Ionicons name="card-outline" size={24} color="#1d4ed8" />
           </View>
           <View style={styles.methodInfo}>
             <Text style={styles.methodTitle}>Credit / Debit Card</Text>
@@ -120,7 +120,7 @@ export default function PaymentScreen({ route, navigation }: any) {
           onPress={() => setSelectedMethod('cash')}
         >
           <View style={styles.methodIconBox}>
-            <Ionicons name="cash-outline" size={24} color="#0f766e" />
+            <Ionicons name="cash-outline" size={24} color="#1d4ed8" />
           </View>
           <View style={styles.methodInfo}>
             <Text style={styles.methodTitle}>Cash on Arrival</Text>
@@ -226,12 +226,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  methodCardSelected: { borderColor: '#0f766e', backgroundColor: '#f0fdfa' },
+  methodCardSelected: { borderColor: '#1d4ed8', backgroundColor: '#eff6ff' },
   methodIconBox: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#ccfbf1',
+    backgroundColor: '#eff6ff',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -248,8 +248,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: { borderColor: '#0f766e' },
-  radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#0f766e' },
+  radioSelected: { borderColor: '#1d4ed8' },
+  radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#1d4ed8' },
   footer: {
     backgroundColor: '#fff',
     paddingHorizontal: 20,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   totalLabel: { fontSize: 16, color: '#64748b', fontWeight: '500' },
   totalAmount: { fontSize: 24, color: '#0f172a', fontWeight: '800' },
   payButton: {
-    backgroundColor: '#0f766e',
+    backgroundColor: '#1d4ed8',
     flexDirection: 'row',
     height: 56,
     borderRadius: 16,

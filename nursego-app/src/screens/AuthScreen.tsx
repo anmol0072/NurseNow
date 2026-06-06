@@ -134,7 +134,7 @@ export default function AuthScreen({ navigation }: any) {
 
       {/* Full Screen Premium Gradient */}
       <LinearGradient
-        colors={['#020617', '#0f766e', '#042f2e']}
+        colors={['#020617', '#1e3a8a', '#172554']}
         style={StyleSheet.absoluteFillObject}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -234,7 +234,7 @@ export default function AuthScreen({ navigation }: any) {
 
               <TouchableOpacity activeOpacity={0.8} onPress={handleLogin} disabled={isLoading}>
                 <LinearGradient
-                  colors={isLoading ? ['#94a3b8', '#64748b'] : ['#14b8a6', '#0f766e']}
+                  colors={isLoading ? ['#94a3b8', '#64748b'] : ['#3b82f6', '#1d4ed8']}
                   style={styles.primaryButton}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 24,
     padding: 4,
-    shadowColor: '#14b8a6',
+    shadowColor: '#3b82f6',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   roleButtonActive: {
-    backgroundColor: 'rgba(20, 184, 166, 0.8)',
+    backgroundColor: 'rgba(59, 130, 246, 0.8)',
   },
   roleText: {
     fontSize: 14,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     marginTop: 8,
-    shadowColor: '#14b8a6',
+    shadowColor: '#3b82f6',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -450,11 +450,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(20, 184, 166, 0.5)',
+    borderColor: 'rgba(59, 130, 246, 0.5)',
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
-    color: '#14b8a6',
+    color: '#60a5fa',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     top: Platform.OS === 'web' ? 20 : 50,
     left: 20,
     right: 20,
-    backgroundColor: 'rgba(20, 184, 166, 0.95)',
+    backgroundColor: 'rgba(59, 130, 246, 0.95)',
     padding: 16,
     borderRadius: 12,
     zIndex: 1000,

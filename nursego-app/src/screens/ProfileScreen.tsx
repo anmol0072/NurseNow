@@ -1,10 +1,18 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import FeatureUnavailableModal from '../components/FeatureUnavailableModal';
 
 export default function ProfileScreen({ navigation }: any) {
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [modalData, setModalData] = React.useState({ title: '', message: '' });
+
+  const showModal = (title: string, message: string) => {
+    setModalData({ title, message });
+    setModalVisible(true);
+  };
   const handleLogout = async () => {
     await AsyncStorage.clear();
     navigation.replace('Login');
@@ -23,10 +31,27 @@ export default function ProfileScreen({ navigation }: any) {
         </View>
 
         <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>JD</Text>
+          <View style={styles.avatarWrapper}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>JD</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.editAvatarBtn}
+              onPress={() => showModal('Edit Image', 'Image upload coming soon!')}
+            >
+              <Ionicons name="camera" size={16} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>John Doe</Text>
+          
+          <View style={styles.nameRow}>
+            <Text style={styles.userName}>John Doe</Text>
+            <TouchableOpacity 
+              onPress={() => showModal('Edit Profile', 'Profile editing coming soon!')}
+              style={{ marginLeft: 8 }}
+            >
+              <Ionicons name="pencil" size={20} color="#1d4ed8" />
+            </TouchableOpacity>
+          </View>
           <Text style={styles.userPhone}>+91 98765 43210</Text>
           <View style={styles.uhidBadge}>
             <Text style={styles.uhidText}>UHID: NN-1A2B3C</Text>
@@ -88,7 +113,10 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support</Text>
           
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => Linking.openURL('https://nursenow.in')}
+          >
             <View style={styles.menuItemLeft}>
               <View style={[styles.iconBox, { backgroundColor: '#dcfce7' }]}>
                 <Ionicons name="help-buoy-outline" size={20} color="#16a34a" />
@@ -105,6 +133,13 @@ export default function ProfileScreen({ navigation }: any) {
         </TouchableOpacity>
 
       </ScrollView>
+
+      <FeatureUnavailableModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        title={modalData.title}
+        message={modalData.message}
+      />
     </SafeAreaView>
   );
 }
@@ -119,9 +154,12 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
   
   profileCard: { backgroundColor: '#fff', borderRadius: 24, padding: 24, alignItems: 'center', marginBottom: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 5 },
-  avatarContainer: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#0f766e', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 4, borderColor: '#ccfbf1' },
+  avatarWrapper: { position: 'relative', marginBottom: 16 },
+  avatarContainer: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#1d4ed8', alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: '#eff6ff' },
   avatarText: { fontSize: 32, fontWeight: '900', color: '#fff' },
-  userName: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 4 },
+  editAvatarBtn: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#1d4ed8', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#fff' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  userName: { fontSize: 24, fontWeight: '900', color: '#0f172a' },
   userPhone: { fontSize: 16, color: '#64748b', fontWeight: '500', marginBottom: 16 },
   
   uhidBadge: { backgroundColor: '#f1f5f9', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },

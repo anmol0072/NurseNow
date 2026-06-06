@@ -74,7 +74,7 @@ export default function ReceiptScreen({ route, navigation }: any) {
 
         <View style={styles.actionContainer}>
           <TouchableOpacity style={styles.secondaryBtn}>
-            <Ionicons name="download-outline" size={20} color="#0f766e" style={{ marginRight: 8 }} />
+            <Ionicons name="download-outline" size={20} color="#1d4ed8" style={{ marginRight: 8 }} />
             <Text style={styles.secondaryBtnText}>Download PDF</Text>
           </TouchableOpacity>
           
@@ -97,14 +97,14 @@ export default function ReceiptScreen({ route, navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#0f766e' },
+  safeArea: { flex: 1, backgroundColor: '#1d4ed8' },
   scrollView: { flex: 1 },
   scrollContent: { padding: 24, maxWidth: 600, width: '100%', alignSelf: 'center', paddingBottom: 60 },
   
   successHeader: { alignItems: 'center', marginTop: 20, marginBottom: 40 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#14b8a6', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 4, borderColor: '#ccfbf1' },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#3b82f6', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 4, borderColor: '#eff6ff' },
   successTitle: { fontSize: 28, fontWeight: '900', color: '#fff', marginBottom: 8 },
-  successSub: { fontSize: 16, color: '#ccfbf1', fontWeight: '500' },
+  successSub: { fontSize: 16, color: '#eff6ff', fontWeight: '500' },
 
   receiptCard: { backgroundColor: '#fff', borderRadius: 24, padding: 30, shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.15, shadowRadius: 30, elevation: 10 },
   receiptHeader: { alignItems: 'center', marginBottom: 20 },
@@ -124,11 +124,11 @@ const styles = StyleSheet.create({
 
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   totalLabel: { fontSize: 18, color: '#0f172a', fontWeight: '900' },
-  totalValue: { fontSize: 28, color: '#0f766e', fontWeight: '900' },
+  totalValue: { fontSize: 28, color: '#1d4ed8', fontWeight: '900' },
 
   actionContainer: { marginTop: 40 },
-  secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ccfbf1', paddingVertical: 16, borderRadius: 16, marginBottom: 16 },
-  secondaryBtnText: { color: '#0f766e', fontWeight: '800', fontSize: 16 },
+  secondaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eff6ff', paddingVertical: 16, borderRadius: 16, marginBottom: 16 },
+  secondaryBtnText: { color: '#1d4ed8', fontWeight: '800', fontSize: 16 },
   primaryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', paddingVertical: 18, borderRadius: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 15, elevation: 6 },
   primaryBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

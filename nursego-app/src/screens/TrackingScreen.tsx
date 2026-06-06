@@ -9,98 +9,23 @@ const { width, height } = Dimensions.get('window');
 export default function TrackingScreen({ route, navigation }: any) {
   const mapRef = useRef<View>(null);
 
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      const initTrackingMap = () => {
-        // @ts-ignore
-        if (!window.google) return;
-        const mapElement = mapRef.current as unknown as HTMLElement;
-        if (!mapElement) return;
-
-        // Connaught Place & India Gate simulation
-        const patientLocation = { lat: 28.6139, lng: 77.2090 };
-        const initialNurseLocation = { lat: 28.6250, lng: 77.2150 };
-
-        // @ts-ignore
-        const map = new window.google.maps.Map(mapElement, {
-          center: { lat: 28.6190, lng: 77.2120 }, 
-          zoom: 15,
-          disableDefaultUI: true,
-          styles: [
-            { "elementType": "geometry", "stylers": [{"color": "#f5f5f5"}] },
-            { "elementType": "labels.icon", "stylers": [{"visibility": "off"}] },
-            { "elementType": "labels.text.fill", "stylers": [{"color": "#616161"}] },
-            { "elementType": "labels.text.stroke", "stylers": [{"color": "#f5f5f5"}] },
-            { "featureType": "water", "elementType": "geometry", "stylers": [{"color": "#c9c9c9"}] }
-          ]
-        });
-
-        // @ts-ignore
-        const directionsService = new window.google.maps.DirectionsService();
-        // @ts-ignore
-        const directionsRenderer = new window.google.maps.DirectionsRenderer({
-          map,
-          suppressMarkers: true,
-          polylineOptions: { strokeColor: '#0f766e', strokeWeight: 5 }
-        });
-
-        // @ts-ignore
-        new window.google.maps.Marker({
-          position: patientLocation,
-          map,
-          icon: { url: 'https://cdn-icons-png.flaticon.com/512/25/25694.png', scaledSize: new window.google.maps.Size(30, 30) }
-        });
-
-        // @ts-ignore
-        const nurseMarker = new window.google.maps.Marker({
-          position: initialNurseLocation,
-          map,
-          icon: { url: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png', scaledSize: new window.google.maps.Size(40, 40) },
-          zIndex: 999
-        });
-
-        directionsService.route({
-          origin: initialNurseLocation,
-          destination: patientLocation,
-          // @ts-ignore
-          travelMode: window.google.maps.TravelMode.DRIVING
-        }, (result: any, status: any) => {
-          if (status === 'OK') {
-            directionsRenderer.setDirections(result);
-            
-            // Animate marker smoothly along the route
-            const routePath = result.routes[0].overview_path;
-            let i = 0;
-            const interval = setInterval(() => {
-              if (i >= routePath.length) {
-                clearInterval(interval);
-                return;
-              }
-              nurseMarker.setPosition(routePath[i]);
-              i++;
-            }, 600); // speed of car
-          }
-        });
-      };
-
-      // @ts-ignore
-      if (!window.google) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAEJ6oMNsGwveIlwNLlCVbw4DzcNGNzBl4`;
-        script.async = true;
-        script.defer = true;
-        script.onload = initTrackingMap;
-        document.body.appendChild(script);
-      } else {
-        initTrackingMap();
-      }
-    }
-  }, []);
+  // Removed broken Google Maps API Initialization
 
   return (
     <View style={styles.container}>
-      {/* Real Google Map */}
-      <View ref={mapRef} style={StyleSheet.absoluteFillObject} />
+      {/* Map Fallback */}
+      {Platform.OS === 'web' ? (
+        <iframe 
+          src="https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik"
+          style={{ position: 'absolute', width: '100%', height: '100%', border: 'none' }}
+        />
+      ) : (
+        <Image 
+          source={{ uri: 'https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_1280.png' }} 
+          style={StyleSheet.absoluteFillObject} 
+          resizeMode="cover"
+        />
+      )}
 
       {/* Back Button Overlay */}
       <SafeAreaView style={styles.topOverlay} pointerEvents="box-none">
@@ -147,11 +72,11 @@ export default function TrackingScreen({ route, navigation }: any) {
 
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Chat')}>
-              <Ionicons name="chatbubble" size={24} color="#0f766e" />
+              <Ionicons name="chatbubble" size={24} color="#1d4ed8" />
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="call" size={24} color="#0f766e" />
+              <Ionicons name="call" size={24} color="#1d4ed8" />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Rating', route?.params || {})}>
@@ -328,7 +253,7 @@ const styles = StyleSheet.create({
   pinValue: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#0f766e',
+    color: '#1d4ed8',
     letterSpacing: 2,
   },
   nurseInfoCard: {
@@ -345,7 +270,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#0f766e',
+    backgroundColor: '#3b82f6',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -388,7 +313,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#ccfbf1',
+    backgroundColor: '#eff6ff',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,

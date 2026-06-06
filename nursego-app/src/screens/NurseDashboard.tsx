@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch, Platform, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,65 +29,7 @@ export default function NurseDashboard({ navigation }: any) {
     loadUser();
   }, []);
 
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      const initMap = () => {
-        // @ts-ignore
-        if (!window.google) return;
-        const mapElement = mapRef.current as unknown as HTMLElement;
-        if (!mapElement) return;
-
-        // @ts-ignore
-        const map = new window.google.maps.Map(mapElement, {
-          center: { lat: 28.6139, lng: 77.2090 }, // New Delhi coordinates
-          zoom: 14,
-          disableDefaultUI: true,
-          styles: [
-            { "elementType": "geometry", "stylers": [{"color": "#f5f5f5"}] },
-            { "elementType": "labels.icon", "stylers": [{"visibility": "off"}] },
-            { "elementType": "labels.text.fill", "stylers": [{"color": "#616161"}] },
-            { "elementType": "labels.text.stroke", "stylers": [{"color": "#f5f5f5"}] },
-            { "featureType": "water", "elementType": "geometry", "stylers": [{"color": "#c9c9c9"}] }
-          ]
-        });
-        
-        mapInstanceRef.current = map;
-
-        // Add Nurse Marker
-        // @ts-ignore
-        nurseMarkerRef.current = new window.google.maps.Marker({
-          position: { lat: 28.6139, lng: 77.2090 },
-          map,
-          icon: {
-            url: 'https://cdn-icons-png.flaticon.com/512/3063/3063205.png',
-            // @ts-ignore
-            scaledSize: new window.google.maps.Size(40, 40)
-          }
-        });
-      };
-
-      // Ensure initMap runs after component mounts
-      const checkAndInitMap = () => {
-        if (mapRef.current) {
-          initMap();
-        } else {
-          setTimeout(checkAndInitMap, 100);
-        }
-      };
-
-      // @ts-ignore
-      if (!window.google) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAEJ6oMNsGwveIlwNLlCVbw4DzcNGNzBl4`;
-        script.async = true;
-        script.defer = true;
-        script.onload = checkAndInitMap;
-        document.body.appendChild(script);
-      } else {
-        checkAndInitMap();
-      }
-    }
-  }, [locationSet]);
+  // Removed broken Google Maps API Initialization
 
   // Mock function to simulate a patient booking a service
   const triggerMockJob = () => {
@@ -161,7 +103,21 @@ export default function NurseDashboard({ navigation }: any) {
         </View>
 
         {/* Map & Location Placeholder */}
-        <View style={locationSet ? styles.mapActive : styles.mapPlaceholder} ref={mapRef}>
+        <View style={locationSet ? styles.mapActive : styles.mapPlaceholder}>
+          {locationSet && Platform.OS === 'web' && (
+            <iframe 
+              src="https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik"
+              style={{ position: 'absolute', width: '100%', height: '100%', border: 'none' }}
+            />
+          )}
+          {locationSet && Platform.OS !== 'web' && (
+            <Image 
+              source={{ uri: 'https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_1280.png' }} 
+              style={{ ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' }} 
+              resizeMode="cover"
+            />
+          )}
+
           {!locationSet && (
             <>
               <Text style={styles.mapIcon}>📍</Text>

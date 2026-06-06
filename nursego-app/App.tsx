@@ -5,7 +5,7 @@ import './global.css';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthScreen from './src/screens/AuthScreen';
-import PatientDashboard from './src/screens/PatientDashboard';
+import MainTabNavigator from './src/navigation/MainTabNavigator';
 import NurseDashboard from './src/screens/NurseDashboard';
 import NurseDocumentScreen from './src/screens/NurseDocumentScreen';
 import RegistrationScreen from './src/screens/RegistrationScreen';
@@ -61,7 +61,7 @@ export default function App() {
       <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Auth" component={AuthScreen} />
         <Stack.Screen name="Register" component={RegistrationScreen} />
-        <Stack.Screen name="Patient" component={PatientDashboard} />
+        <Stack.Screen name="Patient" component={MainTabNavigator} />
         <Stack.Screen name="FindingNurse" component={FindingNurseScreen} />
         <Stack.Screen name="Nurse" component={NurseDashboard} />
         <Stack.Screen name="NurseDocument" component={NurseDocumentScreen} />

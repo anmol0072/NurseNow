@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Dimensions, Animated, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import FeatureUnavailableModal from './FeatureUnavailableModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,6 +14,7 @@ interface SideMenuProps {
 
 export default function SideMenu({ visible, onClose, navigation }: SideMenuProps) {
   const insets = useSafeAreaInsets();
+  const [modalVisible, setModalVisible] = React.useState(false);
   
   const MENU_ITEMS = [
     { id: 'home', title: 'Home', icon: 'home-outline' },
@@ -26,9 +28,12 @@ export default function SideMenu({ visible, onClose, navigation }: SideMenuProps
     onClose();
     if (id === 'home') {
       // Already on home mostly
+    } else if (id === 'support') {
+      import('react-native').then(({ Linking }) => {
+        Linking.openURL('https://nursenow.in');
+      });
     } else {
-      // Handle other routes or show coming soon
-      alert('Feature coming soon!');
+      setModalVisible(true);
     }
   };
 
@@ -62,6 +67,12 @@ export default function SideMenu({ visible, onClose, navigation }: SideMenuProps
           </View>
         </View>
       </View>
+      <FeatureUnavailableModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        title="Coming Soon"
+        message="This feature will be available shortly."
+      />
     </Modal>
   );
 }

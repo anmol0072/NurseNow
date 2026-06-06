@@ -1,22 +1,27 @@
 {
   "expo": {
-    "name": "nursenow-app",
+    "name": "NurseNow",
     "slug": "nursenow-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.jpeg",
+    "splash": {
+      "image": "./assets/logo.jpeg",
+      "resizeMode": "contain",
+      "backgroundColor": "#1d4ed8"
+    },
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nursenow.app"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/logo.jpeg"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.nursenow.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

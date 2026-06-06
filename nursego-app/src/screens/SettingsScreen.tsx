@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity, SafeAreaView, Platform, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import FeatureUnavailableModal from '../components/FeatureUnavailableModal';
 
 export default function SettingsScreen({ navigation }: any) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({ title: '', message: '' });
+
+  const showModal = (title: string, message: string) => {
+    setModalData({ title, message });
+    setModalVisible(true);
+  };
   const [pushEnabled, setPushEnabled] = useState(true);
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [smsEnabled, setSmsEnabled] = useState(false);
@@ -62,23 +70,30 @@ export default function SettingsScreen({ navigation }: any) {
 
         <Section title="PRIVACY & SECURITY">
           <ToggleRow icon="location-outline" label="Location Services" value={locationEnabled} onValueChange={setLocationEnabled} />
-          <LinkRow icon="lock-closed-outline" label="Change Password" onPress={() => {}} />
-          <LinkRow icon="shield-checkmark-outline" label="Two-Factor Authentication" onPress={() => {}} isLast />
+          <LinkRow icon="lock-closed-outline" label="Change Password" onPress={() => showModal('Change Password', 'This feature is coming soon!')} />
+          <LinkRow icon="shield-checkmark-outline" label="Two-Factor Authentication" onPress={() => showModal('2FA', 'Two-Factor Authentication is coming soon!')} isLast />
         </Section>
 
         <Section title="ABOUT">
-          <LinkRow icon="document-text-outline" label="Terms of Service" onPress={() => {}} />
-          <LinkRow icon="shield-half-outline" label="Privacy Policy" onPress={() => {}} />
-          <LinkRow icon="information-circle-outline" label="About NurseGo" onPress={() => {}} isLast />
+          <LinkRow icon="document-text-outline" label="Terms of Service" onPress={() => Linking.openURL('https://nursenow.in/terms')} />
+          <LinkRow icon="shield-half-outline" label="Privacy Policy" onPress={() => Linking.openURL('https://nursenow.in/privacy')} />
+          <LinkRow icon="information-circle-outline" label="About NurseGo" onPress={() => Linking.openURL('https://nursenow.in')} isLast />
         </Section>
 
         <View style={styles.deleteSection}>
-          <TouchableOpacity style={styles.deleteBtn} onPress={() => {}}>
+          <TouchableOpacity style={styles.deleteBtn} onPress={() => Alert.alert('Delete Account', 'Are you sure you want to delete your account? This action cannot be undone.', [{text: 'Cancel', style: 'cancel'}, {text: 'Delete', style: 'destructive'}])}>
             <Text style={styles.deleteBtnText}>Delete Account</Text>
           </TouchableOpacity>
         </View>
 
       </ScrollView>
+
+      <FeatureUnavailableModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+        title={modalData.title}
+        message={modalData.message}
+      />
     </SafeAreaView>
   );
 }

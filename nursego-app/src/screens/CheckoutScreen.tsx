@@ -107,7 +107,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
           <Text style={styles.footerTotalPrice}>₹{total.toFixed(2)}</Text>
         </View>
         <TouchableOpacity onPress={handleContinueToPayment} activeOpacity={0.8}>
-          <LinearGradient colors={['#14b8a6', '#0f766e']} style={styles.payBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+          <LinearGradient colors={['#3b82f6', '#1d4ed8']} style={styles.payBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
             <Text style={styles.payBtnText}>Continue to Payment</Text>
             <Ionicons name="chevron-forward" size={20} color="#fff" />
           </LinearGradient>
@@ -125,13 +125,13 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   scrollContent: { padding: 24, paddingBottom: 100, maxWidth: 600, width: '100%', alignSelf: 'center' },
   
-  nurseCard: { backgroundColor: '#0f766e', borderRadius: 20, padding: 20, marginBottom: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#0f766e', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6 },
+  nurseCard: { backgroundColor: '#1d4ed8', borderRadius: 20, padding: 20, marginBottom: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#1d4ed8', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6 },
   nurseHeader: { flexDirection: 'row', alignItems: 'center' },
-  nurseAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#ccfbf1', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 2, borderColor: '#fff' },
+  nurseAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#eff6ff', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 2, borderColor: '#fff' },
   nurseName: { fontSize: 18, fontWeight: '800', color: '#fff', marginBottom: 2 },
-  nurseRating: { fontSize: 14, color: '#ccfbf1', fontWeight: '600' },
-  etaBadge: { backgroundColor: '#ccfbf1', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  etaText: { color: '#0f766e', fontWeight: '900', fontSize: 12 },
+  nurseRating: { fontSize: 14, color: '#eff6ff', fontWeight: '600' },
+  etaBadge: { backgroundColor: '#eff6ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
+  etaText: { color: '#1d4ed8', fontWeight: '900', fontSize: 12 },
 
   card: { backgroundColor: '#fff', borderRadius: 24, padding: 24, marginBottom: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 4 },
   cardTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 20 },
@@ -141,20 +141,20 @@ const styles = StyleSheet.create({
   divider: { height: 1, backgroundColor: '#f1f5f9', marginVertical: 12 },
   thickDivider: { height: 2, backgroundColor: '#e2e8f0', borderStyle: 'dashed' },
   totalText: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
-  totalPrice: { fontSize: 22, fontWeight: '900', color: '#0f766e' },
+  totalPrice: { fontSize: 22, fontWeight: '900', color: '#1d4ed8' },
 
   tipRow: { flexDirection: 'row', gap: 12, marginBottom: 32, marginTop: 8 },
   tipBtn: { flex: 1, paddingVertical: 14, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'center' },
-  tipBtnActive: { backgroundColor: '#ccfbf1', borderColor: '#0f766e', borderWidth: 2 },
+  tipBtnActive: { backgroundColor: '#eff6ff', borderColor: '#1d4ed8', borderWidth: 2 },
   tipText: { fontWeight: '700', color: '#64748b' },
-  tipTextActive: { color: '#0f766e', fontWeight: '900' },
+  tipTextActive: { color: '#1d4ed8', fontWeight: '900' },
 
   sectionTitle: { fontSize: 16, fontWeight: '800', color: '#334155', marginBottom: 16, marginTop: 8 },
   paymentOption: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, borderWidth: 2, borderColor: '#f1f5f9' },
-  paymentOptionActive: { borderColor: '#5eead4', backgroundColor: '#f0fdfa' },
+  paymentOptionActive: { borderColor: '#60a5fa', backgroundColor: '#eff6ff' },
   paymentIconContainer: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#f8fafc', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   paymentText: { flex: 1, fontSize: 16, fontWeight: '600', color: '#475569' },
-  paymentTextActive: { color: '#0f766e', fontWeight: '800' },
+  paymentTextActive: { color: '#1d4ed8', fontWeight: '800' },
 
   cardInputContainer: { backgroundColor: '#fff', padding: 16, borderRadius: 16, marginBottom: 12, borderWidth: 1, borderColor: '#e2e8f0' },
   cardInput: { backgroundColor: '#f8fafc', padding: 14, borderRadius: 12, fontSize: 15, fontWeight: '500', color: '#0f172a', borderWidth: 1, borderColor: '#e2e8f0' },
