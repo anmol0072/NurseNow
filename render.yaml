@@ -14,6 +14,8 @@ services:
         value: "rzp_test_mockkey123456"
       - key: RAZORPAY_KEY_SECRET
         value: "secret123"
+      - key: NODE_VERSION
+        value: "18.17.0"
 
   - type: web
     name: nursego-frontend
@@ -31,3 +33,5 @@ services:
           type: web
           name: nursego-backend
           envVarKey: RENDER_EXTERNAL_URL
+      - key: NODE_VERSION
+        value: "18.17.0"
