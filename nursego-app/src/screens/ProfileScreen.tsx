@@ -1,17 +1,33 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FeatureUnavailableModal from '../components/FeatureUnavailableModal';
 
 export default function ProfileScreen({ navigation }: any) {
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [modalData, setModalData] = React.useState({ title: '', message: '' });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({ title: '', message: '' });
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: 'John Doe',
+    phone: '+91 98765 43210',
+    bloodType: 'O+',
+    allergies: 'Penicillin',
+    weight: '72 kg'
+  });
+
+  const [editForm, setEditForm] = useState(profileData);
 
   const showModal = (title: string, message: string) => {
     setModalData({ title, message });
     setModalVisible(true);
+  };
+
+  const handleSaveProfile = () => {
+    setProfileData(editForm);
+    setEditModalVisible(false);
   };
   const handleLogout = async () => {
     await AsyncStorage.clear();
@@ -44,34 +60,39 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
           
           <View style={styles.nameRow}>
-            <Text style={styles.userName}>John Doe</Text>
+            <Text style={styles.userName}>{profileData.name}</Text>
             <TouchableOpacity 
-              onPress={() => showModal('Edit Profile', 'Profile editing coming soon!')}
+              onPress={() => { setEditForm(profileData); setEditModalVisible(true); }}
               style={{ marginLeft: 8 }}
             >
               <Ionicons name="pencil" size={20} color="#1d4ed8" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userPhone}>+91 98765 43210</Text>
+          <Text style={styles.userPhone}>{profileData.phone}</Text>
           <View style={styles.uhidBadge}>
             <Text style={styles.uhidText}>UHID: NN-1A2B3C</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Medical History</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16}}>
+            <Text style={[styles.sectionTitle, {marginBottom: 0}]}>Medical History</Text>
+            <TouchableOpacity onPress={() => { setEditForm(profileData); setEditModalVisible(true); }}>
+              <Text style={{color: '#1d4ed8', fontWeight: '700'}}>Edit</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.medicalGrid}>
             <View style={styles.medicalBox}>
               <Text style={styles.medicalLabel}>Blood Type</Text>
-              <Text style={styles.medicalValue}>O+</Text>
+              <Text style={styles.medicalValue}>{profileData.bloodType}</Text>
             </View>
             <View style={styles.medicalBox}>
               <Text style={styles.medicalLabel}>Allergies</Text>
-              <Text style={styles.medicalValue}>Penicillin</Text>
+              <Text style={styles.medicalValue}>{profileData.allergies}</Text>
             </View>
             <View style={styles.medicalBox}>
               <Text style={styles.medicalLabel}>Weight</Text>
-              <Text style={styles.medicalValue}>72 kg</Text>
+              <Text style={styles.medicalValue}>{profileData.weight}</Text>
             </View>
           </View>
         </View>
@@ -140,6 +161,44 @@ export default function ProfileScreen({ navigation }: any) {
         title={modalData.title}
         message={modalData.message}
       />
+
+      {/* Edit Profile Modal */}
+      <Modal visible={editModalVisible} animationType="slide" transparent={true} onRequestClose={() => setEditModalVisible(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 500 }}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput style={styles.input} value={editForm.name} onChangeText={(text) => setEditForm({...editForm, name: text})} />
+
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput style={styles.input} value={editForm.phone} onChangeText={(text) => setEditForm({...editForm, phone: text})} />
+
+              <Text style={styles.sectionTitle}>Medical Details</Text>
+              
+              <Text style={styles.inputLabel}>Blood Type</Text>
+              <TextInput style={styles.input} value={editForm.bloodType} onChangeText={(text) => setEditForm({...editForm, bloodType: text})} />
+
+              <Text style={styles.inputLabel}>Allergies</Text>
+              <TextInput style={styles.input} value={editForm.allergies} onChangeText={(text) => setEditForm({...editForm, allergies: text})} />
+
+              <Text style={styles.inputLabel}>Weight</Text>
+              <TextInput style={styles.input} value={editForm.weight} onChangeText={(text) => setEditForm({...editForm, weight: text})} />
+            </ScrollView>
+
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
+              <Text style={styles.saveBtnText}>Save Changes</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -180,4 +239,13 @@ const styles = StyleSheet.create({
 
   logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fee2e2', padding: 16, borderRadius: 16, marginTop: 16 },
   logoutText: { color: '#ef4444', fontSize: 16, fontWeight: '800' },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: '#64748b', marginBottom: 8, marginTop: 16 },
+  input: { backgroundColor: '#f8fafc', paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', fontSize: 15, fontWeight: '500', color: '#0f172a' },
+  saveBtn: { backgroundColor: '#1d4ed8', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginTop: 24 },
+  saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' }
 });

@@ -26,6 +26,7 @@ export default function PatientDashboard({ navigation }: any) {
   const [destination, setDestination] = useState('');
   const [mapUrl, setMapUrl] = useState('https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik');
   const [isSearchingMap, setIsSearchingMap] = useState(false);
+  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   const handleSearchLocation = async () => {
@@ -106,8 +107,8 @@ export default function PatientDashboard({ navigation }: any) {
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
         {/* Location & Map Section */}
-        <View style={styles.locationCard}>
-          <View style={styles.mapContainer}>
+        <View style={isMapFullScreen ? styles.fullScreenMapContainer : styles.locationCard}>
+          <View style={isMapFullScreen ? styles.fullScreenMap : styles.mapContainer}>
             {Platform.OS === 'web' ? (
               <>
                 {isSearchingMap && (
@@ -127,7 +128,19 @@ export default function PatientDashboard({ navigation }: any) {
                 resizeMode="cover"
               />
             )}
+            
+            {!isMapFullScreen ? (
+              <TouchableOpacity style={styles.expandBtn} onPress={() => setIsMapFullScreen(true)}>
+                <Ionicons name="expand" size={20} color="#1d4ed8" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.mapBackBtn} onPress={() => setIsMapFullScreen(false)}>
+                <Ionicons name="arrow-back" size={24} color="#0f172a" />
+              </TouchableOpacity>
+            )}
           </View>
+          
+          {!isMapFullScreen && (
           <View style={styles.destinationInputContainer}>
             <Ionicons name="location" size={20} color="#e11d48" style={styles.searchIcon} />
             <TextInput 
@@ -146,6 +159,7 @@ export default function PatientDashboard({ navigation }: any) {
               )}
             </TouchableOpacity>
           </View>
+          )}
         </View>
 
         {/* Search & Filter Services */}
@@ -160,7 +174,7 @@ export default function PatientDashboard({ navigation }: any) {
               onChangeText={setSearchQuery}
             />
           </View>
-          <TouchableOpacity style={styles.filterButton}>
+          <TouchableOpacity style={styles.filterButton} onPress={() => Alert.alert('Filters', 'Service filters and sorting options coming soon!')}>
             <Ionicons name="options-outline" size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
@@ -341,6 +355,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 10,
   },
+  expandBtn: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(255,255,255,0.9)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, zIndex: 5 },
+  fullScreenMapContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, backgroundColor: '#fff' },
+  fullScreenMap: { flex: 1, width: '100%', height: '100%', position: 'relative' },
+  mapBackBtn: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 20, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, zIndex: 10 },
   destinationInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',

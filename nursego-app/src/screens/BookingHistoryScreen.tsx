@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,6 +41,20 @@ const PAST_BOOKINGS = [
 ];
 
 export default function BookingHistoryScreen({ navigation }: any) {
+  const [rebookModalVisible, setRebookModalVisible] = useState(false);
+  const [selectedService, setSelectedService] = useState('');
+  const [rebookForm, setRebookForm] = useState({ date: '15 May, 2026', time: '10:00 AM' });
+
+  const openRebookModal = (service: string) => {
+    setSelectedService(service);
+    setRebookModalVisible(true);
+  };
+
+  const confirmRebook = () => {
+    setRebookModalVisible(false);
+    navigation.navigate('PatientDashboard', { preselectService: selectedService, date: rebookForm.date, time: rebookForm.time });
+  };
+
   const renderBooking = ({ item }: { item: typeof PAST_BOOKINGS[0] }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -71,7 +85,7 @@ export default function BookingHistoryScreen({ navigation }: any) {
           <Ionicons name="receipt-outline" size={16} color="#2563eb" />
           <Text style={styles.viewReceiptText}>View Receipt</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.rebookBtn} onPress={() => navigation.navigate('PatientDashboard', { preselectService: item.service })}>
+        <TouchableOpacity style={styles.rebookBtn} onPress={() => openRebookModal(item.service)}>
           <Text style={styles.rebookText}>Rebook</Text>
         </TouchableOpacity>
       </View>
@@ -95,6 +109,32 @@ export default function BookingHistoryScreen({ navigation }: any) {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Rebook Modal */}
+      <Modal visible={rebookModalVisible} animationType="fade" transparent={true} onRequestClose={() => setRebookModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Rebook Service</Text>
+              <TouchableOpacity onPress={() => setRebookModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalSub}>{selectedService}</Text>
+
+            <Text style={styles.inputLabel}>Select Date</Text>
+            <TextInput style={styles.input} value={rebookForm.date} onChangeText={(text) => setRebookForm({...rebookForm, date: text})} placeholder="DD MMM, YYYY" />
+
+            <Text style={styles.inputLabel}>Select Time</Text>
+            <TextInput style={styles.input} value={rebookForm.time} onChangeText={(text) => setRebookForm({...rebookForm, time: text})} placeholder="HH:MM AM/PM" />
+
+            <TouchableOpacity style={styles.confirmBtn} onPress={confirmRebook}>
+              <Text style={styles.confirmBtnText}>Confirm Rebooking</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -232,5 +272,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '700',
     fontSize: 14,
-  }
+  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: '#fff', borderRadius: 24, padding: 24 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  modalTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
+  modalSub: { fontSize: 16, color: '#1d4ed8', fontWeight: '700', marginBottom: 24 },
+  inputLabel: { fontSize: 13, fontWeight: '700', color: '#64748b', marginBottom: 8, marginTop: 12 },
+  input: { backgroundColor: '#f8fafc', paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', fontSize: 15, fontWeight: '500', color: '#0f172a' },
+  confirmBtn: { backgroundColor: '#1d4ed8', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginTop: 24 },
+  confirmBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' }
 });

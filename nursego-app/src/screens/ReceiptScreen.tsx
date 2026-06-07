@@ -18,9 +18,14 @@ export default function ReceiptScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.replace('Patient')} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        <View style={styles.successHeader}>
+        <View style={[styles.successHeader, { marginTop: 0 }]}>
           <View style={styles.iconCircle}>
             <Ionicons name="checkmark" size={40} color="#fff" />
           </View>
@@ -86,8 +91,6 @@ export default function ReceiptScreen({ route, navigation }: any) {
             <Text style={styles.primaryBtnText}>Track Live Map</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.replace('Patient')} style={{ marginTop: 24, alignItems: 'center' }}>
-            <Text style={{ color: '#64748b', fontWeight: '700', fontSize: 16 }}>Back to Dashboard</Text>
           </TouchableOpacity>
         </View>
 
@@ -98,8 +101,10 @@ export default function ReceiptScreen({ route, navigation }: any) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#1d4ed8' },
+  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
+  backBtn: { padding: 8 },
   scrollView: { flex: 1 },
-  scrollContent: { padding: 24, maxWidth: 600, width: '100%', alignSelf: 'center', paddingBottom: 60 },
+  scrollContent: { padding: 24, paddingTop: 12, maxWidth: 600, width: '100%', alignSelf: 'center', paddingBottom: 60 },
   
   successHeader: { alignItems: 'center', marginTop: 20, marginBottom: 40 },
   iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#3b82f6', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 4, borderColor: '#eff6ff' },
