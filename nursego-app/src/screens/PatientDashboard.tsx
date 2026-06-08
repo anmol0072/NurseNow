@@ -89,17 +89,17 @@ export default function PatientDashboard({ navigation }: any) {
         <View style={styles.statsRow}>
           <View style={styles.statColumn}>
             <Text style={styles.statValue}>1</Text>
-            <Text style={styles.statLabel}>Bookings</Text>
+            <Text style={styles.statLabel}>Active Booking</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statColumn}>
-            <Text style={styles.statValue}>4.8<Text style={{fontSize:16}}>⭐</Text></Text>
-            <Text style={styles.statLabel}>Rating</Text>
+            <Text style={styles.statValue}>O+</Text>
+            <Text style={styles.statLabel}>Blood Type</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statColumn}>
-            <Text style={styles.statValue}>24/7</Text>
-            <Text style={styles.statLabel}>Available</Text>
+            <Text style={styles.statValue}>65 kg</Text>
+            <Text style={styles.statLabel}>Weight</Text>
           </View>
         </View>
       </View>
