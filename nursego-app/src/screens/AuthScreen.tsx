@@ -314,8 +314,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   logo: {
-    width: 110,
-    height: 110,
+    width: 95,
+    height: 95,
   },
   brandName: {
     fontSize: 36,
