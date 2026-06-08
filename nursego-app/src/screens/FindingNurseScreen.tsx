@@ -23,9 +23,9 @@ export default function FindingNurseScreen({ navigation, route }: any) {
       ])
     ).start();
 
-    // After 3.5 seconds, navigate to Tracking screen simulating "Nurse Found"
+    // After 3.5 seconds, navigate to Checkout screen simulating "Nurse Found"
     const timer = setTimeout(() => {
-      navigation.replace('Tracking', route.params);
+      navigation.replace('Checkout', route.params);
     }, 3500);
 
     return () => clearTimeout(timer);

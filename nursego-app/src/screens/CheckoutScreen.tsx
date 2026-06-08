@@ -18,7 +18,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
   const total = subtotal + gst + tipAmount;
 
   const handleContinueToPayment = () => {
-    navigation.navigate('FindingNurse', { total, serviceName });
+    navigation.navigate('Tracking', { total, serviceName });
   };
 
   // Removed processing overlay since payment is moved to PaymentScreen
