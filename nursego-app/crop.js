@@ -1,38 +1,41 @@
 const sharp = require('sharp');
-const path = require('path');
 
 async function processImage() {
   try {
     const original = 'C:\\Users\\91985\\.gemini\\antigravity\\brain\\704bc962-ebbe-481a-942f-0ae850f610cf\\media__1780941465316.png';
     
-    // 1. Extract the full width (678px) to guarantee no letters are horizontally cut!
-    // We only crop the top and bottom 96 pixels to remove the black letterbox bars.
-    const buffer = await sharp(original)
-      .extract({ width: 678, height: 480, left: 0, top: 96 })
-      .toBuffer();
+    // 1. Auto-trim the black edges. This leaves ONLY the exact white box containing the logo.
+    const trimmedBuffer = await sharp(original).trim().toBuffer();
+    
+    // Get the dimensions of the trimmed white box
+    const metadata = await sharp(trimmedBuffer).metadata();
+    console.log(`Trimmed size: ${metadata.width}x${metadata.height}`);
 
-    // 2. Put it on a mathematically calculated 850x850 white canvas.
-    // This exact ratio ensures that when shrunk to a 150x150 circle,
-    // the corners of the 678x480 box are at a radius of 72.8px,
-    // safely inside the circle's 75px radius, without being too small!
+    // 2. We want to pad it with pure white so the logo is perfectly safe from circular clipping.
+    // The diagonal of the white box shouldn't exceed the circle diameter.
+    // To safely fit a WxH box inside a circle without ANY clipping:
+    // The canvas should be roughly 1.41 * max(W, H)
+    const maxSize = Math.max(metadata.width, metadata.height);
+    const canvasSize = Math.ceil(maxSize * 1.5); // 50% padding for complete safety
+
     await sharp({
       create: {
-        width: 850,
-        height: 850,
+        width: canvasSize,
+        height: canvasSize,
         channels: 4,
         background: { r: 255, g: 255, b: 255, alpha: 1 }
       }
     })
       .composite([
         {
-          input: buffer,
+          input: trimmedBuffer,
           gravity: 'center'
         }
       ])
       .png()
       .toFile('assets/nursego_logo.png');
 
-    console.log('Logo perfectly processed without cutting width!');
+    console.log(`Padded on a ${canvasSize}x${canvasSize} white canvas. Done!`);
   } catch (err) {
     console.error('Error processing image:', err);
   }
