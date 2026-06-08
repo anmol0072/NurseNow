@@ -161,7 +161,7 @@ export default function PaymentScreen({ route, navigation }: any) {
         } else {
            const options = {
              description: serviceName,
-             image: 'https://nursenow.in/logo.png',
+             image: 'https://nursego.in/logo.png',
              currency: 'INR',
              key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
@@ -291,7 +291,7 @@ export default function PaymentScreen({ route, navigation }: any) {
         } else {
            const options = {
              description: 'Adding funds to wallet',
-             image: 'https://nursenow.in/logo.png',
+             image: 'https://nursego.in/logo.png',
              currency: 'INR',
              key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
@@ -331,7 +331,7 @@ export default function PaymentScreen({ route, navigation }: any) {
         
         {/* Wallet Balance Card */}
         <View style={styles.walletCard}>
-          <Text style={styles.walletLabel}>NurseNow Wallet Balance</Text>
+          <Text style={styles.walletLabel}>NurseGo Wallet Balance</Text>
           <Text style={styles.walletBalance}>₹ 1,250.00</Text>
           <TouchableOpacity style={styles.addMoneyBtn}>
             <Ionicons name="add" size={18} color="#fff" />

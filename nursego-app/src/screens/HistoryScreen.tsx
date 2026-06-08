@@ -1,15 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 
 export default function HistoryScreen({ navigation }: any) {
+  const [userRole, setUserRole] = useState('PATIENT');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const u = await AsyncStorage.getItem('user');
+        if (u) {
+          const parsed = JSON.parse(u);
+          if (parsed.role) setUserRole(parsed.role);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const isNurse = userRole === 'NURSE';
   
+  // Theme colors based on role
+  const primaryColor = isNurse ? '#14b8a6' : '#0f172a'; // Green for Nurse, Dark Blue for Patient
+  const secondaryColor = isNurse ? '#0f766e' : '#0f766e'; // Both can use teal for amounts/receipts
+
   // Dummy History Data
   const MOCK_HISTORY = [
-    { id: '1', date: 'Oct 12, 2026', time: '10:30 AM', service: 'IV Drip', status: 'Completed', amount: '₹699', nurse: 'Sarah Jenkins' },
-    { id: '2', date: 'Oct 10, 2026', time: '02:00 PM', service: 'Injection', status: 'Completed', amount: '₹400', nurse: 'Michael Doe' },
-    { id: '3', date: 'Oct 05, 2026', time: '11:15 AM', service: 'Physiotherapy', status: 'Cancelled', amount: '₹1200', nurse: 'Emily Chen' },
+    { id: '1', date: 'Oct 12, 2026', time: '10:30 AM', service: 'IV Drip', status: 'Completed', amount: '699', nurse: 'Sarah Jenkins' },
+    { id: '2', date: 'Oct 10, 2026', time: '02:00 PM', service: 'Injection', status: 'Completed', amount: '400', nurse: 'Michael Doe' },
+    { id: '3', date: 'Oct 05, 2026', time: '11:15 AM', service: 'Physiotherapy', status: 'Cancelled', amount: '1200', nurse: 'Emily Chen' },
   ];
+
+  const handleDownloadReceipt = async (item: any) => {
+    try {
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; }
+              .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+              .title { font-size: 28px; font-weight: bold; color: ${primaryColor}; margin: 0; }
+              .subtitle { font-size: 16px; color: #666; margin-top: 5px; }
+              .row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 10px; }
+              .label { font-weight: bold; color: #555; }
+              .value { color: #111; }
+              .total { font-size: 22px; font-weight: bold; color: ${primaryColor}; text-align: right; margin-top: 30px; }
+              .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #aaa; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1 class="title">NurseGo Receipt</h1>
+              <p class="subtitle">Transaction ID: TRP-000${item.id}</p>
+            </div>
+            <div class="row"><span class="label">Date:</span><span class="value">${item.date}</span></div>
+            <div class="row"><span class="label">Time:</span><span class="value">${item.time}</span></div>
+            <div class="row"><span class="label">Service:</span><span class="value">${item.service}</span></div>
+            <div class="row"><span class="label">Nurse:</span><span class="value">${item.nurse}</span></div>
+            <div class="row"><span class="label">Status:</span><span class="value" style="color: green;">${item.status}</span></div>
+            
+            <div class="total">Total Paid: ₹${item.amount}</div>
+            
+            <div class="footer">Thank you for choosing NurseGo. For support, contact support@nursego.in</div>
+          </body>
+        </html>
+      `;
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html: htmlContent });
+      } else {
+        const { uri } = await Print.printToFileAsync({ html: htmlContent });
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(uri);
+        } else {
+          Alert.alert('Success', 'Receipt PDF generated, but sharing is not available on this device.');
+        }
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      Alert.alert('Error', 'Failed to generate receipt PDF.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -41,18 +117,20 @@ export default function HistoryScreen({ navigation }: any) {
                 <Text style={styles.serviceTitle}>{item.service}</Text>
                 <Text style={styles.nurseName}>Nurse: {item.nurse}</Text>
               </View>
-              <Text style={styles.amountText}>{item.amount}</Text>
+              <Text style={[styles.amountText, { color: secondaryColor }]}>₹{item.amount}</Text>
             </View>
 
             {item.status === 'Completed' && (
               <View style={styles.cardFooter}>
-                <TouchableOpacity style={styles.receiptBtn}>
-                  <Ionicons name="receipt-outline" size={16} color="#0f766e" />
-                  <Text style={styles.receiptText}>View Receipt</Text>
+                <TouchableOpacity style={styles.receiptBtn} onPress={() => handleDownloadReceipt(item)}>
+                  <Ionicons name="download-outline" size={16} color={secondaryColor} />
+                  <Text style={[styles.receiptText, { color: secondaryColor }]}>View Receipt</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.rebookBtn}>
-                  <Text style={styles.rebookText}>Rebook</Text>
-                </TouchableOpacity>
+                {!isNurse && (
+                  <TouchableOpacity style={styles.rebookBtn}>
+                    <Text style={styles.rebookText}>Rebook</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </View>
@@ -165,7 +243,6 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0f766e',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -182,7 +259,6 @@ const styles = StyleSheet.create({
   },
   receiptText: {
     marginLeft: 6,
-    color: '#0f766e',
     fontWeight: '600',
     fontSize: 14,
   },
