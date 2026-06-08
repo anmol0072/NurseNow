@@ -60,7 +60,7 @@ export default function MainTabNavigator() {
           tabPress: (e) => {
             e.preventDefault();
             import('react-native').then(({ Linking }) => {
-              Linking.openURL('https://nursego.in');
+              Linking.openURL('https://nursenow.in');
             });
           },
         })}

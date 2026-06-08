@@ -50,7 +50,7 @@ export default function ReceiptScreen({ route, navigation }: any) {
             
             <div style="text-align: center; margin-top: 60px; color: #94a3b8; font-size: 12px;">
               <p>Thank you for choosing NurseGo.</p>
-              <p>For any queries, contact support@nursego.in</p>
+              <p>For any queries, contact support@nursenow.in</p>
             </div>
           </body>
         </html>

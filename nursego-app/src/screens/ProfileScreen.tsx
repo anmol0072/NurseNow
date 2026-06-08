@@ -223,7 +223,7 @@ export default function ProfileScreen({ navigation }: any) {
           
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => Linking.openURL('https://nursego.in')}
+            onPress={() => Linking.openURL('https://nursenow.in')}
           >
             <View style={styles.menuItemLeft}>
               <View style={[styles.iconBox, { backgroundColor: '#dcfce7' }]}>

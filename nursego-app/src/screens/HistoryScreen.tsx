@@ -66,7 +66,7 @@ export default function HistoryScreen({ navigation }: any) {
             
             <div class="total">Total Paid: ₹${item.amount}</div>
             
-            <div class="footer">Thank you for choosing NurseGo. For support, contact support@nursego.in</div>
+            <div class="footer">Thank you for choosing NurseGo. For support, contact support@nursenow.in</div>
           </body>
         </html>
       `;

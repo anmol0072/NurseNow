@@ -161,7 +161,7 @@ export default function PaymentScreen({ route, navigation }: any) {
         } else {
            const options = {
              description: serviceName,
-             image: 'https://nursego.in/logo.png',
+             image: 'https://nursenow.in/logo.png',
              currency: 'INR',
              key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
@@ -291,7 +291,7 @@ export default function PaymentScreen({ route, navigation }: any) {
         } else {
            const options = {
              description: 'Adding funds to wallet',
-             image: 'https://nursego.in/logo.png',
+             image: 'https://nursenow.in/logo.png',
              currency: 'INR',
              key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
