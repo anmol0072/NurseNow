@@ -150,7 +150,7 @@ export default function AuthScreen({ navigation }: any) {
             {/* Header with Logo */}
             <View style={styles.headerContainer}>
               <View style={styles.logoGlow}>
-                <Image source={require('../../assets/logo.jpeg')} style={styles.logo} resizeMode="contain" />
+                <Image source={require('../../assets/logo.jpeg')} style={styles.logo} resizeMode="cover" />
               </View>
               <Text style={styles.brandName}>NurseGo</Text>
               <Text style={styles.subtitle}>Elevating Healthcare Standards</Text>
@@ -300,22 +300,22 @@ const styles = StyleSheet.create({
   },
   logoGlow: {
     backgroundColor: '#fff',
-    borderRadius: 60,
+    borderRadius: 75,
     shadowColor: '#3b82f6',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
     elevation: 10,
     marginBottom: 16,
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden'
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
   },
   brandName: {
     fontSize: 36,
