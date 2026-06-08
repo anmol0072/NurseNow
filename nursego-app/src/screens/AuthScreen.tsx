@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#0f172a',
+    color: '#fff',
     fontSize: 15,
     paddingVertical: 14,
   },
