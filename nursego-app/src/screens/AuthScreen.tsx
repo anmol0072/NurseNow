@@ -311,11 +311,10 @@ const styles = StyleSheet.create({
     height: 150,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden'
   },
   logo: {
-    width: 95,
-    height: 95,
+    width: 105,
+    height: 105,
   },
   brandName: {
     fontSize: 36,
