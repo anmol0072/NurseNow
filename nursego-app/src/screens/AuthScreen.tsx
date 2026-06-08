@@ -150,7 +150,7 @@ export default function AuthScreen({ navigation }: any) {
             {/* Header with Logo */}
             <View style={styles.headerContainer}>
               <View style={styles.logoGlow}>
-                <Image source={require('../../assets/logo.jpeg')} style={styles.logo} resizeMode="contain" />
+                <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="contain" />
               </View>
               <Text style={styles.brandName}>NurseGo</Text>
               <Text style={styles.subtitle}>Elevating Healthcare Standards</Text>
