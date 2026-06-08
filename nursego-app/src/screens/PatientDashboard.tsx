@@ -162,7 +162,7 @@ export default function PatientDashboard({ navigation }: any) {
           )}
         </View>
 
-        {/* Search & Filter Services */}
+        {/* Search Services */}
         <View style={styles.searchSection}>
           <View style={styles.searchBar}>
             <Ionicons name="search" size={20} color="#94a3b8" style={styles.searchIcon} />
@@ -174,9 +174,6 @@ export default function PatientDashboard({ navigation }: any) {
               onChangeText={setSearchQuery}
             />
           </View>
-          <TouchableOpacity style={styles.filterButton} onPress={() => Alert.alert('Filters', 'Service filters and sorting options coming soon!')}>
-            <Ionicons name="options-outline" size={24} color="#0f172a" />
-          </TouchableOpacity>
         </View>
 
         {/* Category Chips */}

@@ -55,7 +55,7 @@ export default function ProfileScreen({ navigation }: any) {
   };
   const handleLogout = async () => {
     await AsyncStorage.clear();
-    navigation.replace('Login');
+    navigation.replace('Auth');
   };
 
   return (
