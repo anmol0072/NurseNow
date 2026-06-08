@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal, TextInput, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -343,7 +343,48 @@ const styles = StyleSheet.create({
   menuItemText: { fontSize: 16, fontWeight: '600', color: '#334155' },
 
   logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fee2e2', padding: 16, borderRadius: 16, marginTop: 16 },
-  logoutText: { color: '#ef4444', fontSize: 16, fontWeight: '800' },
+  logoutText: {
+    color: '#ef4444',
+    fontSize: 16,
+    fontWeight: '600'
+  },
+  medicalCard: {
+    backgroundColor: '#f0fdf4',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#dcfce7'
+  },
+  medicalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  medicalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f766e',
+    marginLeft: 8
+  },
+  medicalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12
+  },
+  medicalItem: {
+    flex: 1
+  },
+  medicalLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4
+  },
+  medicalValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#334155'
+  },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24 },
