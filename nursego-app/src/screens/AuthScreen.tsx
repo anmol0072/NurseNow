@@ -134,7 +134,7 @@ export default function AuthScreen({ navigation }: any) {
 
       {/* Full Screen Premium Gradient */}
       <LinearGradient
-        colors={['transparent', 'rgba(15,23,42,0.9)', '#0f172a']}
+        colors={role === 'NURSE' ? ['transparent', 'rgba(6,78,59,0.9)', '#022c22'] : ['transparent', 'rgba(15,23,42,0.9)', '#0f172a']}
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -300,19 +300,22 @@ const styles = StyleSheet.create({
   },
   logoGlow: {
     backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 4,
+    borderRadius: 50,
     shadowColor: '#3b82f6',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
     elevation: 10,
     marginBottom: 16,
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden'
   },
   logo: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
+    width: 150,
+    height: 150,
   },
   brandName: {
     fontSize: 36,

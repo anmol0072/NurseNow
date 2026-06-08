@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal, TextInput, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal, TextInput, Platform, KeyboardAvoidingView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import FeatureUnavailableModal from '../components/FeatureUnavailableModal';
 
 export default function ProfileScreen({ navigation }: any) {
@@ -19,6 +20,29 @@ export default function ProfileScreen({ navigation }: any) {
   });
 
   const [editForm, setEditForm] = useState(profileData);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const loadProfile = async () => {
+      const savedImage = await AsyncStorage.getItem('profileImage');
+      if (savedImage) setProfileImage(savedImage);
+    };
+    loadProfile();
+  }, []);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
+      await AsyncStorage.setItem('profileImage', result.assets[0].uri);
+    }
+  };
 
   const showModal = (title: string, message: string) => {
     setModalData({ title, message });
@@ -49,11 +73,15 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>JD</Text>
+              {profileImage ? (
+                <Image source={{ uri: profileImage }} style={{ width: '100%', height: '100%', borderRadius: 40 }} />
+              ) : (
+                <Text style={styles.avatarText}>JD</Text>
+              )}
             </View>
             <TouchableOpacity 
               style={styles.editAvatarBtn}
-              onPress={() => showModal('Edit Image', 'Image upload coming soon!')}
+              onPress={pickImage}
             >
               <Ionicons name="camera" size={16} color="#fff" />
             </TouchableOpacity>

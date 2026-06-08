@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Pla
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import RazorpayCheckout from 'react-native-razorpay';
 
 export default function PaymentScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -23,37 +24,85 @@ export default function PaymentScreen({ route, navigation }: any) {
         const patientId = user?.id || 'anonymous';
         
         const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${BASE_URL}/api/bookings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            patientId,
-            serviceName,
-            totalAmount: total,
-            distance: 4,
-            paymentMethod: selectedMethod
-          })
-        });
-        
-        const data = await res.json();
-        setIsProcessing(false);
-        
-        if (data.success) {
-          navigation.replace('Tracking', { serviceName, total, paymentMethod: selectedMethod });
-        } else {
-          Alert.alert('Booking Error', data.message || 'Failed to create booking.');
+
+        // Cash on Arrival skips gateway
+        if (selectedMethod === 'cash') {
+           const res = await fetch(`${BASE_URL}/api/bookings`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod })
+           });
+           const data = await res.json();
+           setIsProcessing(false);
+           if (data.success) {
+             navigation.replace('Tracking', { serviceName, total, paymentMethod: 'Cash on Arrival' });
+           } else {
+             Alert.alert('Booking Error', data.message || 'Failed to create booking.');
+           }
+           return;
         }
+
+        // Real Gateway for UPI/Card
+        const orderRes = await fetch(`${BASE_URL}/api/payments/create-order`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ amount: total })
+        });
+        const orderData = await orderRes.json();
+
+        if (orderData.id && orderData.id.startsWith('order_mock_')) {
+           setIsProcessing(false);
+           Alert.alert('Razorpay Keys Missing', 'To open the real payment gateway, please add your real RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to the backend .env file. For now, we will simulate success.');
+           // Fallback simulate success
+           navigation.replace('Tracking', { serviceName, total, paymentMethod: selectedMethod.toUpperCase() });
+           return;
+        }
+
+        const options = {
+          description: serviceName,
+          image: 'https://nursenow.in/logo.png',
+          currency: 'INR',
+          key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+          amount: orderData.amount,
+          name: 'NurseGo',
+          order_id: orderData.id,
+          theme: {color: '#1d4ed8'}
+        }
+
+        RazorpayCheckout.open(options).then(async (data: any) => {
+          // Verify with backend
+          await fetch(`${BASE_URL}/api/payments/verify`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify(data)
+          });
+          
+          // Create Booking
+          await fetch(`${BASE_URL}/api/bookings`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod })
+          });
+          
+          setIsProcessing(false);
+          navigation.replace('Tracking', { serviceName, total, paymentMethod: selectedMethod.toUpperCase() });
+
+        }).catch((error: any) => {
+          setIsProcessing(false);
+          Alert.alert('Payment Failed', `Error: ${error.code} | ${error.description}`);
+        });
+
       } catch (error) {
         setIsProcessing(false);
-        Alert.alert('Network Error', 'Could not connect to the booking server.');
+        Alert.alert('Network Error', 'Could not connect to the server.');
       }
     } else {
       setTimeout(() => {
         setIsProcessing(false);
-        if (Platform.OS === 'web') window.alert('Wallet updated!');
-        else Alert.alert('Success', 'Wallet updated successfully!');
+        if (Platform.OS === 'web') window.alert('Wallet Top-up Gateway opening...');
+        else Alert.alert('Gateway Required', 'Please configure your Razorpay keys to process wallet top-ups.');
         navigation.goBack();
-      }, 1500);
+      }, 1000);
     }
   };
 

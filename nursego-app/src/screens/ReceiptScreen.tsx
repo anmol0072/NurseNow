@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import { Alert, Platform } from 'react-native';
 
 export default function ReceiptScreen({ route, navigation }: any) {
   const { 
@@ -15,6 +18,59 @@ export default function ReceiptScreen({ route, navigation }: any) {
 
   const transactionId = 'TXN' + Math.random().toString(36).substr(2, 9).toUpperCase();
   const date = new Date().toLocaleString();
+
+  const generatePDF = async () => {
+    try {
+      const html = `
+        <html>
+          <body style="font-family: Helvetica, sans-serif; padding: 40px; color: #0f172a;">
+            <div style="text-align: center; margin-bottom: 40px;">
+              <h1 style="color: #1d4ed8; margin: 0;">NurseGo</h1>
+              <p style="color: #64748b; font-size: 14px; letter-spacing: 2px;">DIGITAL RECEIPT</p>
+            </div>
+            
+            <table style="width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+              <tr><td style="color: #64748b; padding: 5px 0;">Transaction ID</td><td style="text-align: right; font-weight: bold;">${transactionId}</td></tr>
+              <tr><td style="color: #64748b; padding: 5px 0;">Date & Time</td><td style="text-align: right; font-weight: bold;">${date}</td></tr>
+              <tr><td style="color: #64748b; padding: 5px 0;">Payment Method</td><td style="text-align: right; font-weight: bold;">${paymentMethod}</td></tr>
+            </table>
+
+            <table style="width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px;">
+              <tr><td style="color: #0f172a; font-weight: bold; padding: 8px 0;">${serviceName}</td><td style="text-align: right; font-weight: bold;">₹${basePrice.toFixed(2)}</td></tr>
+              <tr><td style="color: #0f172a; font-weight: bold; padding: 8px 0;">Distance Surcharge</td><td style="text-align: right; font-weight: bold;">₹${distanceCost.toFixed(2)}</td></tr>
+              <tr><td style="color: #0f172a; font-weight: bold; padding: 8px 0;">Taxes (18% GST)</td><td style="text-align: right; font-weight: bold;">₹${gst.toFixed(2)}</td></tr>
+            </table>
+
+            <table style="width: 100%;">
+              <tr>
+                <td style="font-size: 20px; font-weight: bold; color: #0f172a;">Amount Paid</td>
+                <td style="text-align: right; font-size: 28px; font-weight: 900; color: #1d4ed8;">₹${total.toFixed(2)}</td>
+              </tr>
+            </table>
+            
+            <div style="text-align: center; margin-top: 60px; color: #94a3b8; font-size: 12px;">
+              <p>Thank you for choosing NurseGo.</p>
+              <p>For any queries, contact support@nursenow.in</p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const { uri } = await Print.printToFileAsync({ html });
+      if (Platform.OS === 'web') {
+        window.open(uri);
+      } else {
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(uri);
+        } else {
+          Alert.alert('Download Complete', 'PDF has been generated at: ' + uri);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Could not generate PDF');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -78,7 +134,7 @@ export default function ReceiptScreen({ route, navigation }: any) {
         </View>
 
         <View style={styles.actionContainer}>
-          <TouchableOpacity style={styles.secondaryBtn}>
+          <TouchableOpacity style={styles.secondaryBtn} onPress={generatePDF}>
             <Ionicons name="download-outline" size={20} color="#1d4ed8" style={{ marginRight: 8 }} />
             <Text style={styles.secondaryBtnText}>Download PDF</Text>
           </TouchableOpacity>
