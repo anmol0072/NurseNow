@@ -106,8 +106,32 @@ export default function PaymentScreen({ route, navigation }: any) {
                         Alert.alert('Verification Error', 'Payment succeeded but verification failed.');
                       }
                    },
+                   modal: {
+                      ondismiss: function() {
+                         setProcessingStatus('idle');
+                      }
+                   },
                    theme: {color: '#1d4ed8'}
                 };
+                
+                // Fix React Native Web z-index issues hiding the Razorpay iframe
+                let style = document.getElementById('rzp-style');
+                if (!style) {
+                   style = document.createElement('style');
+                   style.id = 'rzp-style';
+                   style.innerHTML = `
+                     .razorpay-container {
+                       z-index: 2147483647 !important;
+                       position: fixed !important;
+                       top: 0 !important;
+                       left: 0 !important;
+                       right: 0 !important;
+                       bottom: 0 !important;
+                       display: block !important;
+                     }
+                   `;
+                   document.head.appendChild(style);
+                }
                 
                 const rzp = new (window as any).Razorpay(rzpOptions);
                 rzp.on('payment.failed', function (response: any){
@@ -193,32 +217,77 @@ export default function PaymentScreen({ route, navigation }: any) {
         }
 
         if (Platform.OS === 'web') {
-           const script = document.createElement('script');
-           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-           script.async = true;
-           script.onload = () => {
-              const options = {
-                 key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
-                 amount: orderData.amount,
-                 currency: 'INR',
-                 name: 'NurseGo Wallet Top-up',
-                 description: 'Adding funds to wallet',
-                 order_id: orderData.id,
-                 handler: async function (response: any) {
-                    setProcessingStatus('idle');
-                    Alert.alert('Top-up Successful', '₹500 has been added to your wallet.');
-                    navigation.goBack();
-                 },
-                 theme: { color: '#1d4ed8' }
-              };
-              const rzp = new (window as any).Razorpay(options);
-              rzp.on('payment.failed', function (response: any) {
+           const openRazorpayWeb = () => {
+              try {
+                if (!(window as any).Razorpay) {
+                   setProcessingStatus('idle');
+                   Alert.alert('Script Error', 'Razorpay SDK failed to load. Please disable adblockers and try again.');
+                   return;
+                }
+
+                const options = {
+                   key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+                   amount: orderData.amount,
+                   currency: 'INR',
+                   name: 'NurseGo Wallet Top-up',
+                   description: 'Adding funds to wallet',
+                   order_id: orderData.id,
+                   handler: async function (response: any) {
+                      setProcessingStatus('idle');
+                      Alert.alert('Top-up Successful', '₹500 has been added to your wallet.');
+                      navigation.goBack();
+                   },
+                   modal: {
+                      ondismiss: function() {
+                         setProcessingStatus('idle');
+                      }
+                   },
+                   theme: { color: '#1d4ed8' }
+                };
+
+                let style = document.getElementById('rzp-style');
+                if (!style) {
+                   style = document.createElement('style');
+                   style.id = 'rzp-style';
+                   style.innerHTML = `
+                     .razorpay-container {
+                       z-index: 2147483647 !important;
+                       position: fixed !important;
+                       top: 0 !important;
+                       left: 0 !important;
+                       right: 0 !important;
+                       bottom: 0 !important;
+                       display: block !important;
+                     }
+                   `;
+                   document.head.appendChild(style);
+                }
+
+                const rzp = new (window as any).Razorpay(options);
+                rzp.on('payment.failed', function (response: any) {
+                   setProcessingStatus('idle');
+                   Alert.alert('Payment Failed', response.error ? response.error.description : 'Unknown error');
+                });
+                rzp.open();
+              } catch (err: any) {
                  setProcessingStatus('idle');
-                 alert('Payment Failed: ' + response.error.description);
-              });
-              rzp.open();
+                 Alert.alert('Gateway Initialization Error', err.message || 'Failed to open Razorpay');
+              }
            };
-           document.body.appendChild(script);
+
+           if ((window as any).Razorpay) {
+              openRazorpayWeb();
+           } else {
+              const script = document.createElement('script');
+              script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+              script.async = true;
+              script.onload = openRazorpayWeb;
+              script.onerror = () => {
+                 setProcessingStatus('idle');
+                 Alert.alert('Error', 'Failed to load payment gateway script.');
+              };
+              document.body.appendChild(script);
+           }
         } else {
            const options = {
              description: 'Adding funds to wallet',
