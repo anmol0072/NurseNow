@@ -16,14 +16,13 @@ export default function PaymentScreen({ route, navigation }: any) {
 
   const handlePay = async () => {
     setIsProcessing(true);
+    const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
     
     if (isCheckoutFlow) {
       try {
         const userStr = await AsyncStorage.getItem('user');
         const user = userStr ? JSON.parse(userStr) : null;
         const patientId = user?.id || 'anonymous';
-        
-        const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
         // Cash on Arrival skips gateway
         if (selectedMethod === 'cash') {

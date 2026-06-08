@@ -375,16 +375,6 @@ const styles = StyleSheet.create({
   medicalItem: {
     flex: 1
   },
-  medicalLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 4
-  },
-  medicalValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#334155'
-  },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.6)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24 },

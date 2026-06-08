@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+// Trigger Render Deployment 2
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const payments_routes_1 = __importDefault(require("./routes/payments.routes"));
 const bookings_routes_1 = __importDefault(require("./routes/bookings.routes"));
