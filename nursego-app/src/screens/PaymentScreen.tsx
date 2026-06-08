@@ -81,7 +81,7 @@ export default function PaymentScreen({ route, navigation }: any) {
                 }
 
                 const rzpOptions = {
-                   key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+                   key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
                    amount: orderData.amount,
                    currency: 'INR',
                    name: 'NurseGo',
@@ -163,7 +163,7 @@ export default function PaymentScreen({ route, navigation }: any) {
              description: serviceName,
              image: 'https://nursenow.in/logo.png',
              currency: 'INR',
-             key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+             key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
              name: 'NurseGo',
              order_id: orderData.id,
@@ -226,7 +226,7 @@ export default function PaymentScreen({ route, navigation }: any) {
                 }
 
                 const options = {
-                   key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+                   key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
                    amount: orderData.amount,
                    currency: 'INR',
                    name: 'NurseGo Wallet Top-up',
@@ -293,7 +293,7 @@ export default function PaymentScreen({ route, navigation }: any) {
              description: 'Adding funds to wallet',
              image: 'https://nursenow.in/logo.png',
              currency: 'INR',
-             key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxxxxx',
+             key: process.env.EXPO_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Sz6YLxjYCLroG8',
              amount: orderData.amount,
              name: 'NurseGo Wallet Top-up',
              order_id: orderData.id,
