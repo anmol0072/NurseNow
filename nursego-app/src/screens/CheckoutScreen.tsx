@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function CheckoutScreen({ route, navigation }: any) {
   const { serviceName = 'IV Injection', basePrice = 699, distance = 3.2 } = route.params || {};
@@ -15,10 +16,66 @@ export default function CheckoutScreen({ route, navigation }: any) {
   
   const [tipAmount, setTipAmount] = useState<number>(0);
   const [showBiodata, setShowBiodata] = useState(false);
+  const [prescription, setPrescription] = useState<any>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const total = subtotal + gst + tipAmount;
 
-  const handleContinueToPayment = () => {
-    navigation.navigate('Tracking', { total, serviceName });
+  const handleUploadPrescription = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+        copyToCacheDirectory: true
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setPrescription(result.assets[0]);
+      }
+    } catch (err) {
+      console.error('Error picking document', err);
+      Alert.alert('Error', 'Could not pick document');
+    }
+  };
+
+  const handleContinueToPayment = async () => {
+    let prescriptionUrl = null;
+
+    if (prescription) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append('prescription', {
+          uri: Platform.OS === 'ios' ? prescription.uri.replace('file://', '') : prescription.uri,
+          type: prescription.mimeType || 'image/jpeg',
+          name: prescription.name || 'prescription.jpg'
+        } as any);
+
+        const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+        const res = await fetch(`${BASE_URL}/api/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          prescriptionUrl = data.url;
+        } else {
+          Alert.alert('Upload Failed', 'Could not upload prescription.');
+          setIsUploading(false);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        Alert.alert('Upload Error', 'Failed to upload prescription to server.');
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    navigation.navigate('Tracking', { total, serviceName, prescriptionUrl });
   };
 
   // Removed processing overlay since payment is moved to PaymentScreen
@@ -82,6 +139,24 @@ export default function CheckoutScreen({ route, navigation }: any) {
           </View>
         </View>
 
+        {/* Prescription Upload Section */}
+        <Text style={styles.sectionTitle}>Prescription Sheet (Optional)</Text>
+        <TouchableOpacity style={styles.uploadCard} onPress={handleUploadPrescription} activeOpacity={0.8}>
+          <Ionicons name="document-attach-outline" size={32} color="#3b82f6" style={{ marginBottom: 8 }} />
+          {prescription ? (
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.uploadTitle}>Prescription Attached</Text>
+              <Text style={styles.uploadSubtitle}>{prescription.name}</Text>
+              <Text style={styles.reselectText}>Tap to change</Text>
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.uploadTitle}>Upload Prescription</Text>
+              <Text style={styles.uploadSubtitle}>Upload your doctor's sheet to verify the exact injection and dosage.</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         {/* Tip Section */}
         <Text style={styles.sectionTitle}>Add a Tip for Asha (Optional)</Text>
         <View style={styles.tipRow}>
@@ -106,10 +181,16 @@ export default function CheckoutScreen({ route, navigation }: any) {
           <Text style={styles.footerTotalLabel}>Total Pay</Text>
           <Text style={styles.footerTotalPrice}>₹{total.toFixed(2)}</Text>
         </View>
-        <TouchableOpacity onPress={handleContinueToPayment} activeOpacity={0.8}>
+        <TouchableOpacity onPress={handleContinueToPayment} activeOpacity={0.8} disabled={isUploading}>
           <LinearGradient colors={['#3b82f6', '#1d4ed8']} style={styles.payBtn} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-            <Text style={styles.payBtnText}>Confirm Booking</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            {isUploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.payBtnText}>Confirm Booking</Text>
+                <Ionicons name="chevron-forward" size={20} color="#fff" />
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -234,6 +315,36 @@ const styles = StyleSheet.create({
   payBtnText: { color: '#fff', fontWeight: '800', fontSize: 16, marginRight: 8 },
 
   processingContainer: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  uploadCard: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 2,
+    borderColor: '#bfdbfe',
+    borderStyle: 'dashed',
+    borderRadius: 20,
+    padding: 24,
+    marginHorizontal: 20,
+    marginBottom: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  uploadTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1e3a8a',
+    marginBottom: 4,
+  },
+  uploadSubtitle: {
+    fontSize: 13,
+    color: '#3b82f6',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  reselectText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 8,
+    textDecorationLine: 'underline',
+  },
   processingText: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginTop: 24 },
   processingSub: { fontSize: 15, color: '#94a3b8', marginTop: 8 },
 

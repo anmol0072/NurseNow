@@ -11,7 +11,7 @@ export default function PaymentScreen({ route, navigation }: any) {
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'waking'>('idle');
 
   // If accessed from Profile, route.params might be undefined
-  const { total = 0, serviceName = 'Wallet Top-up' } = route?.params || {};
+  const { total = 0, serviceName = 'Wallet Top-up', prescriptionUrl = null } = route?.params || {};
   const isCheckoutFlow = total > 0;
 
   const handlePay = async () => {
@@ -34,7 +34,7 @@ export default function PaymentScreen({ route, navigation }: any) {
            const res = await fetch(`${BASE_URL}/api/bookings`, {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod })
+             body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod, prescriptionUrl })
            });
            const data = await res.json();
            setProcessingStatus('idle');
@@ -97,7 +97,7 @@ export default function PaymentScreen({ route, navigation }: any) {
                         await fetch(`${BASE_URL}/api/bookings`, {
                            method: 'POST',
                            headers: { 'Content-Type': 'application/json' },
-                           body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod })
+                           body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod, prescriptionUrl })
                         });
                         setProcessingStatus('idle');
                         navigation.replace('Rating', { serviceName, total, paymentMethod: selectedMethod.toUpperCase() });
@@ -182,7 +182,7 @@ export default function PaymentScreen({ route, navigation }: any) {
              await fetch(`${BASE_URL}/api/bookings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod })
+                body: JSON.stringify({ patientId, serviceName, totalAmount: total, distance: 4, paymentMethod: selectedMethod, prescriptionUrl })
              });
              
              setProcessingStatus('idle');

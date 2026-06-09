@@ -12,6 +12,7 @@
     "expo": "~56.0.6",
     "expo-auth-session": "~56.0.13",
     "expo-crypto": "~56.0.4",
+    "expo-document-picker": "~56.0.4",
     "expo-image-picker": "^56.0.16",
     "expo-linear-gradient": "~56.0.4",
     "expo-print": "^56.0.3",

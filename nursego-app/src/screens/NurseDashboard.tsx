@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet, Switch, Platform, Image, Linking } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +8,7 @@ import ProfileMenu from '../components/ProfileMenu';
 
 export default function NurseDashboard({ navigation }: any) {
   const [isOnline, setIsOnline] = useState(false);
-  const [incomingJob, setIncomingJob] = useState<boolean>(false);
+  const [availableJobs, setAvailableJobs] = useState<any[]>([]);
   const [locationSet, setLocationSet] = useState(false);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const insets = useSafeAreaInsets();
@@ -32,22 +32,59 @@ export default function NurseDashboard({ navigation }: any) {
 
   // Removed broken Google Maps API Initialization
 
-  // Mock function to simulate a patient booking a service
-  const triggerMockJob = () => {
-    if (!isOnline) {
-      Alert.alert('Offline', 'You must go online to receive requests.');
-      return;
+  const fetchJobs = async () => {
+    if (!isOnline) return;
+    try {
+      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+      const userStr = await AsyncStorage.getItem('user');
+      const u = userStr ? JSON.parse(userStr) : null;
+      if (!u || !u.token) return;
+
+      const res = await fetch(`${BASE_URL}/api/bookings/available`, {
+        headers: { Authorization: `Bearer ${u.token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAvailableJobs(data.bookings);
+      }
+    } catch (err) {
+      console.error(err);
     }
-    setIncomingJob(true);
   };
 
-  const handleAccept = () => {
-    setIncomingJob(false);
-    Alert.alert('Job Accepted', 'Navigate to Patient Location.');
-  };
+  useEffect(() => {
+    let interval: any;
+    if (isOnline) {
+      fetchJobs();
+      interval = setInterval(fetchJobs, 10000); // Polling every 10s
+    } else {
+      setAvailableJobs([]);
+    }
+    return () => clearInterval(interval);
+  }, [isOnline]);
 
-  const handleDecline = () => {
-    setIncomingJob(false);
+  const triggerMockJob = fetchJobs;
+
+  const handleAccept = async (jobId: string) => {
+    try {
+      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+      const userStr = await AsyncStorage.getItem('user');
+      const u = userStr ? JSON.parse(userStr) : null;
+      
+      const res = await fetch(`${BASE_URL}/api/bookings/${jobId}/accept`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${u.token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        Alert.alert('Job Accepted', 'Navigate to Patient Location.');
+        fetchJobs(); // Refresh jobs
+      } else {
+        Alert.alert('Error', data.message);
+      }
+    } catch(err) {
+      Alert.alert('Error', 'Network error');
+    }
   };
 
   return (
@@ -146,32 +183,37 @@ export default function NurseDashboard({ navigation }: any) {
           )}
         </View>
 
-        {/* Incoming Job Modal/Card */}
-        {incomingJob && (
-          <View style={styles.alertCard}>
+        {/* Incoming Jobs */}
+        {availableJobs.map((job: any) => (
+          <View style={styles.alertCard} key={job.id}>
             <View style={styles.alertHeader}>
               <Text style={styles.alertTitle}>🚨 New Request!</Text>
-              <Text style={styles.alertDistance}>5.5 km away</Text>
+              <Text style={styles.alertDistance}>{job.distance.toFixed(1)} km away</Text>
             </View>
             
             <View style={styles.jobDetails}>
-              <Text style={styles.jobService}>IV Injection</Text>
-              <Text style={styles.jobPrice}>Est. Earning: ₹699</Text>
-              <Text style={styles.jobPatient}>Patient: John Doe (Male, 45)</Text>
+              <Text style={styles.jobService}>{job.service?.name}</Text>
+              <Text style={styles.jobPrice}>Est. Earning: ₹{(job.totalAmount * 0.8).toFixed(2)}</Text>
+              <Text style={styles.jobPatient}>Patient: {job.patient?.name}</Text>
+              {job.prescriptionUrl && (
+                <TouchableOpacity onPress={() => Linking.openURL(job.prescriptionUrl)} style={{marginTop: 8}}>
+                   <Text style={{color: '#3b82f6', fontWeight: '700'}}>📋 View Prescription Sheet</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <View style={styles.alertActions}>
-              <TouchableOpacity style={[styles.actionBtn, styles.declineBtn]} onPress={handleDecline}>
+              <TouchableOpacity style={[styles.actionBtn, styles.declineBtn]} onPress={() => setAvailableJobs(availableJobs.filter(j => j.id !== job.id))}>
                 <Text style={styles.declineBtnText}>Decline</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionBtn, styles.acceptBtn]} onPress={handleAccept}>
+              <TouchableOpacity style={[styles.actionBtn, styles.acceptBtn]} onPress={() => handleAccept(job.id)}>
                 <Text style={styles.acceptBtnText}>Accept Job</Text>
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        ))}
 
-        {!incomingJob && (
+        {availableJobs.length === 0 && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateIcon}>🩺</Text>
             <Text style={styles.emptyStateText}>
