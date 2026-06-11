@@ -23,6 +23,7 @@ model User {
   googleId        String?  @unique // For Google Auth
   twoFactorEnabled Boolean @default(false)
   abhaId          String?  @unique // For ABDM Integration
+  isSubscribed    Boolean  @default(false) // For NurseNow Care+
   
   // Nurse specific fields
   experience      Int?

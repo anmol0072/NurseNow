@@ -23,6 +23,13 @@ import FindingNurseScreen from './src/screens/FindingNurseScreen';
 import OffersScreen from './src/screens/OffersScreen';
 import ReferralScreen from './src/screens/ReferralScreen';
 import EmergencyContactsScreen from './src/screens/EmergencyContactsScreen';
+import SubscriptionScreen from './src/screens/SubscriptionScreen';
+import HealthRecordsScreen from './src/screens/HealthRecordsScreen';
+import TreatmentReportForm from './src/screens/TreatmentReportForm';
+import MedicationScreen from './src/screens/MedicationScreen';
+import AIChatScreen from './src/screens/AIChatScreen';
+import DeviceSyncScreen from './src/screens/DeviceSyncScreen';
+import VideoConsultScreen from './src/screens/VideoConsultScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
@@ -89,6 +96,13 @@ export default function App() {
         <Stack.Screen name="Offers" component={OffersScreen} />
         <Stack.Screen name="Referral" component={ReferralScreen} />
         <Stack.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
+        <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+        <Stack.Screen name="HealthRecords" component={HealthRecordsScreen} />
+        <Stack.Screen name="TreatmentReportForm" component={TreatmentReportForm} />
+        <Stack.Screen name="Medication" component={MedicationScreen} />
+        <Stack.Screen name="AIChat" component={AIChatScreen} />
+        <Stack.Screen name="DeviceSync" component={DeviceSyncScreen} />
+        <Stack.Screen name="VideoConsult" component={VideoConsultScreen} />
       </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

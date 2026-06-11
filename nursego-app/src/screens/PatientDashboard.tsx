@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, TextInput, Platform, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Platform, Image, Linking } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const { width } = Dimensions.get('window');
 
 const CATEGORIES = ['All', 'Injection', 'Procedure', 'Diagnostic', 'Care'];
 
@@ -20,43 +18,18 @@ const SERVICES = [
   { id: 9, name: 'Vital Signs Check', desc: 'Temperature, BP, Pulse, Respiration', category: 'Diagnostic', time: '15 min', price: 199, icon: 'heart-half-outline', color: '#db2777', bg: '#fdf2f8', rx: false },
 ];
 
+const PACKAGES = [
+  { id: 'p1', name: 'Stroke Recovery Package', duration: '30 Days', desc: 'Nurse + Physio + Care Attendant', price: 25000, color: '#4f46e5', bg: '#eef2ff' },
+  { id: 'p2', name: 'Elder Care Package', duration: '7 Days', desc: 'Daily Monitoring & Medication', price: 5000, color: '#0891b2', bg: '#ecfeff' }
+];
+
 export default function PatientDashboard({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [destination, setDestination] = useState('');
-  const [mapUrl, setMapUrl] = useState('https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik');
-  const [isSearchingMap, setIsSearchingMap] = useState(false);
+  const [locationText, setLocationText] = useState('Fetching location...');
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [user, setUser] = useState<any>(null);
-
-  const handleSearchLocation = async () => {
-    if (!destination.trim()) return;
-    setIsSearchingMap(true);
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`, {
-        headers: { 'User-Agent': 'NurseGo/1.0' }
-      });
-      const data = await response.json();
-      if (data && data.length > 0) {
-        const place = data[0];
-        const minLon = place.boundingbox[2];
-        const minLat = place.boundingbox[0];
-        const maxLon = place.boundingbox[3];
-        const maxLat = place.boundingbox[1];
-        
-        const newUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${place.lat}%2C${place.lon}`;
-        setMapUrl(newUrl);
-      } else {
-        Alert.alert('Not Found', 'Location not found. Please try being more specific.');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Could not search location.');
-    } finally {
-      setIsSearchingMap(false);
-    }
-  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -64,483 +37,324 @@ export default function PatientDashboard({ navigation }: any) {
       if (u) setUser(JSON.parse(u));
     };
     loadUser();
+    setTimeout(() => {
+      setLocationText('B-402, Shanti Vihar, New Delhi');
+    }, 1500);
   }, []);
 
   const filteredServices = SERVICES.filter(s => {
-    const matchesCat = activeCategory === 'All' || s.category === activeCategory;
-    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.desc.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCat && matchesSearch;
+    const matchesCategory = activeCategory === 'All' || s.category === activeCategory;
+    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
   });
 
+  const handleBookService = (service: any) => {
+    // Determine the base price. If user is subscribed, apply 10% discount to base!
+    const discount = user?.isSubscribed ? 0.10 : 0;
+    const finalBasePrice = service.price * (1 - discount);
+
+    navigation.navigate('FindingNurse', { 
+      serviceName: service.name, 
+      basePrice: finalBasePrice, 
+      distance: 2.5,
+      requiresPrescription: service.rx 
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Top Blue Header */}
+    <SafeAreaView style={styles.container} edges={['right', 'left']}>
+      {/* Dynamic Header */}
       <View style={[styles.headerBackground, { paddingTop: Math.max(insets.top, 20) }]}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.greetingText}>Good afternoon,</Text>
-            <Text style={styles.nameText}>{user?.name ? user.name.charAt(0).toUpperCase() : 'S'} 👋</Text>
+            <Text style={styles.greetingText}>Good Morning,</Text>
+            <Text style={styles.nameText}>{user?.name ? user.name.split(' ')[0] : 'Guest'}</Text>
           </View>
-          <View style={styles.uhidBadge}>
-            <Ionicons name="shield-checkmark-outline" size={14} color="#f8fafc" />
-            <Text style={styles.uhidText}>UHID-2026-9743</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <View style={styles.uhidBadge}>
+              <Ionicons name="person" size={14} color="#f8fafc" />
+              <Text style={styles.uhidText}>PROFILE</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.statsRow}>
-          <View style={styles.statColumn}>
-            <Text style={styles.statValue}>1</Text>
-            <Text style={styles.statLabel}>Active Booking</Text>
-          </View>
+          <TouchableOpacity style={styles.statColumn} onPress={() => navigation.navigate('HealthRecords')}>
+            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statLabel}>Health Records</Text>
+          </TouchableOpacity>
           <View style={styles.statDivider} />
-          <View style={styles.statColumn}>
-            <Text style={styles.statValue}>O+</Text>
-            <Text style={styles.statLabel}>Blood Type</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statColumn}>
-            <Text style={styles.statValue}>65 kg</Text>
-            <Text style={styles.statLabel}>Weight</Text>
-          </View>
+          <TouchableOpacity style={styles.statColumn} onPress={() => navigation.navigate('Subscription')}>
+            <Text style={styles.statValue}>{user?.isSubscribed ? 'Active' : 'Upgrade'}</Text>
+            <Text style={styles.statLabel}>Care+ Status</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* Location & Map Section */}
-        <View style={isMapFullScreen ? styles.fullScreenMapContainer : styles.locationCard}>
-          <View style={isMapFullScreen ? styles.fullScreenMap : styles.mapContainer}>
-            {Platform.OS === 'web' ? (
-              <>
-                {isSearchingMap && (
-                  <View style={styles.mapLoaderOverlay}>
-                    <ActivityIndicator size="large" color="#1d4ed8" />
-                  </View>
-                )}
+        {/* Interactive Location Card */}
+        <View style={styles.locationCard}>
+          <View style={styles.mapContainer}>
+             {Platform.OS === 'web' ? (
                 <iframe 
-                  src={mapUrl}
-                  style={{ width: '100%', height: '100%', border: 'none', opacity: isSearchingMap ? 0.5 : 1 }}
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik"
+                  style={{ position: 'absolute', width: '100%', height: '100%', border: 'none' }}
                 />
-              </>
-            ) : (
-              <Image 
-                source={{ uri: 'https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_1280.png' }} 
-                style={{ width: '100%', height: '100%' }} 
-                resizeMode="cover"
-              />
-            )}
-            
-            {!isMapFullScreen ? (
-              <TouchableOpacity style={styles.expandBtn} onPress={() => setIsMapFullScreen(true)}>
-                <Ionicons name="expand" size={20} color="#1d4ed8" />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.mapBackBtn} onPress={() => setIsMapFullScreen(false)}>
-                <Ionicons name="arrow-back" size={24} color="#0f172a" />
-              </TouchableOpacity>
-            )}
-          </View>
-          
-          {!isMapFullScreen && (
-          <View style={styles.destinationInputContainer}>
-            <Ionicons name="location" size={20} color="#e11d48" style={styles.searchIcon} />
-            <TextInput 
-              style={styles.searchInput}
-              placeholder="Search destination..."
-              placeholderTextColor="#94a3b8"
-              value={destination}
-              onChangeText={setDestination}
-              onSubmitEditing={handleSearchLocation}
-            />
-            <TouchableOpacity style={styles.setLocationBtn} onPress={handleSearchLocation} disabled={isSearchingMap}>
-              {isSearchingMap ? (
-                <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.setLocationBtnText}>Search</Text>
+                <Image 
+                  source={{ uri: 'https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_1280.png' }} 
+                  style={{ ...StyleSheet.absoluteFill, width: '100%', height: '100%' }} 
+                  resizeMode="cover"
+                />
               )}
+            <TouchableOpacity style={styles.expandBtn} onPress={() => setIsMapFullScreen(true)}>
+              <Ionicons name="expand" size={16} color="#0f172a" />
             </TouchableOpacity>
           </View>
-          )}
+          
+          <View style={styles.destinationInputContainer}>
+            <Ionicons name="location" size={20} color="#1d4ed8" style={{ marginRight: 8 }} />
+            <TextInput 
+              style={{ flex: 1, fontSize: 14, color: '#0f172a', fontWeight: '500' }}
+              value={locationText}
+              onChangeText={setLocationText}
+              placeholder="Enter patient location"
+              placeholderTextColor="#94a3b8"
+            />
+            <TouchableOpacity style={styles.setLocationBtn}>
+              <Text style={styles.setLocationBtnText}>Set</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Search Services */}
+        {/* Search Bar */}
         <View style={styles.searchSection}>
           <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#94a3b8" style={styles.searchIcon} />
+            <Ionicons name="search" size={20} color="#64748b" />
             <TextInput 
               style={styles.searchInput}
-              placeholder="Search services..."
+              placeholder="Search for injections, dressing, etc."
               placeholderTextColor="#94a3b8"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
+          <TouchableOpacity style={styles.filterBtn}>
+            <Ionicons name="options" size={20} color="#ffffff" />
+          </TouchableOpacity>
         </View>
 
-        {/* Category Chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll} contentContainerStyle={{ paddingHorizontal: 16 }}>
-          {CATEGORIES.map(cat => {
-            const isActive = activeCategory === cat;
-            return (
-              <TouchableOpacity 
-                key={cat} 
-                style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-                onPress={() => setActiveCategory(cat)}
-              >
-                <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{cat}</Text>
-              </TouchableOpacity>
-            );
-          })}
+        {/* Categories */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+          {CATEGORIES.map((cat, index) => (
+            <TouchableOpacity 
+              key={index}
+              style={[styles.categoryBadge, activeCategory === cat && styles.categoryBadgeActive]}
+              onPress={() => setActiveCategory(cat)}
+            >
+              <Text style={[styles.categoryText, activeCategory === cat && styles.categoryTextActive]}>{cat}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Care+ Subscription Banner */}
+        {!user?.isSubscribed && (
+          <TouchableOpacity 
+            style={styles.carePlusBanner}
+            onPress={() => navigation.navigate('Subscription')}
+            activeOpacity={0.9}
+          >
+            <View style={styles.carePlusContent}>
+              <View style={styles.carePlusBadge}><Text style={styles.carePlusBadgeText}>NEW</Text></View>
+              <Text style={styles.carePlusTitle}>NurseNow <Text style={{color: '#fff'}}>Care+</Text></Text>
+              <Text style={styles.carePlusSub}>Get priority booking & 10% off every service.</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
+
+        {/* Feature Icons Grid (Phase 2 Additions) */}
+        <View style={styles.featuresGrid}>
+          <TouchableOpacity style={styles.featureItem} onPress={() => navigation.navigate('AIChat')}>
+             <View style={[styles.featureIconBox, { backgroundColor: '#f0fdf4' }]}>
+               <Ionicons name="chatbubbles-outline" size={24} color="#16a34a" />
+             </View>
+             <Text style={styles.featureItemText}>AI Nurse</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.featureItem} onPress={() => navigation.navigate('DeviceSync')}>
+             <View style={[styles.featureIconBox, { backgroundColor: '#fef2f2' }]}>
+               <Ionicons name="pulse-outline" size={24} color="#ef4444" />
+             </View>
+             <Text style={styles.featureItemText}>Vitals Sync</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.featureItem} onPress={() => navigation.navigate('Medication')}>
+             <View style={[styles.featureIconBox, { backgroundColor: '#eff6ff' }]}>
+               <Ionicons name="medical-outline" size={24} color="#3b82f6" />
+             </View>
+             <Text style={styles.featureItemText}>Pill Reminder</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.featureItem} onPress={() => navigation.navigate('VideoConsult')}>
+             <View style={[styles.featureIconBox, { backgroundColor: '#faf5ff' }]}>
+               <Ionicons name="videocam-outline" size={24} color="#9333ea" />
+             </View>
+             <Text style={styles.featureItemText}>Telehealth</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Recovery Packages */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recovery Packages</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
+          {PACKAGES.map(pkg => (
+            <TouchableOpacity 
+              key={pkg.id} 
+              style={[styles.packageCard, { backgroundColor: pkg.bg, borderColor: pkg.color }]}
+              onPress={() => handleBookService({ name: pkg.name, price: pkg.price })}
+            >
+              <Text style={[styles.pkgDuration, { color: pkg.color }]}>{pkg.duration}</Text>
+              <Text style={styles.pkgTitle}>{pkg.name}</Text>
+              <Text style={styles.pkgDesc}>{pkg.desc}</Text>
+              <Text style={[styles.pkgPrice, { color: pkg.color }]}>₹{pkg.price.toLocaleString()}</Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
         {/* Section Title */}
-        <View style={styles.sectionTitleRow}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Available Services</Text>
           <Text style={styles.sectionSubtitle}>{filteredServices.length} services</Text>
         </View>
 
         {/* Services List */}
-        <View style={styles.servicesList}>
+        <View style={styles.servicesGrid}>
           {filteredServices.map(service => (
             <TouchableOpacity 
               key={service.id} 
               style={styles.serviceCard}
-              onPress={() => navigation.navigate('FindingNurse', { serviceName: service.name, basePrice: service.price, distance: 2.5 })}
+              onPress={() => handleBookService(service)}
             >
               <View style={[styles.serviceIconContainer, { backgroundColor: service.bg }]}>
                 <Ionicons name={service.icon as any} size={28} color={service.color} />
               </View>
-              
-              <View style={styles.serviceDetails}>
+              <View style={styles.serviceInfo}>
                 <Text style={styles.serviceName}>{service.name}</Text>
                 <Text style={styles.serviceDesc} numberOfLines={1}>{service.desc}</Text>
-                <View style={styles.badgesRow}>
-                  <View style={[styles.categoryBadge, { backgroundColor: service.bg }]}>
-                    <Text style={[styles.categoryBadgeText, { color: service.color }]}>{service.category}</Text>
-                  </View>
-                  <View style={styles.timeBadge}>
+                <View style={styles.serviceMeta}>
+                  <View style={styles.metaBadge}>
                     <Ionicons name="time-outline" size={12} color="#64748b" />
-                    <Text style={styles.timeBadgeText}>{service.time}</Text>
+                    <Text style={styles.metaText}>{service.time}</Text>
                   </View>
+                  {service.rx && (
+                     <View style={[styles.metaBadge, { backgroundColor: '#fef2f2', marginLeft: 6 }]}>
+                       <Text style={[styles.metaText, { color: '#ef4444' }]}>Rx Required</Text>
+                     </View>
+                  )}
                 </View>
               </View>
-
-              <View style={styles.servicePriceColumn}>
-                <Text style={styles.servicePrice}>₹{service.price}</Text>
-                {service.rx && (
-                  <View style={styles.rxBadge}>
-                    <Text style={styles.rxText}>Rx</Text>
-                  </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.priceText}>
+                  ₹{(service.price * (user?.isSubscribed ? 0.9 : 1)).toFixed(0)}
+                </Text>
+                {user?.isSubscribed && (
+                  <Text style={{fontSize: 10, color: '#16a34a', fontWeight: '800'}}>10% OFF</Text>
                 )}
-                <Ionicons name="chevron-forward" size={16} color="#cbd5e1" style={{ marginTop: 4 }} />
+                <View style={styles.bookBtn}>
+                  <Text style={styles.bookBtnText}>Book</Text>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
         </View>
-
       </ScrollView>
-    </View>
+
+      {/* Full Screen Map Modal */}
+      {isMapFullScreen && (
+        <View style={styles.fullScreenMapContainer}>
+          {Platform.OS === 'web' ? (
+             <iframe 
+               src="https://www.openstreetmap.org/export/embed.html?bbox=77.10%2C28.50%2C77.30%2C28.70&layer=mapnik"
+               style={{ position: 'absolute', width: '100%', height: '100%', border: 'none' }}
+             />
+           ) : (
+             <Image 
+               source={{ uri: 'https://cdn.pixabay.com/photo/2019/09/22/16/20/location-4496459_1280.png' }} 
+               style={{ ...StyleSheet.absoluteFill, width: '100%', height: '100%' }} 
+               resizeMode="cover"
+             />
+           )}
+          <TouchableOpacity style={[styles.mapBackBtn, { top: Math.max(insets.top, 20) }]} onPress={() => setIsMapFullScreen(false)}>
+            <Ionicons name="arrow-back" size={24} color="#0f172a" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  headerBackground: {
-    backgroundColor: '#1d4ed8',
-    paddingBottom: 24,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  greetingText: {
-    color: '#bfdbfe',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  nameText: {
-    color: '#ffffff',
-    fontSize: 28,
-    fontWeight: '800',
-    marginTop: 4,
-  },
-  uhidBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  uhidText: {
-    color: '#f8fafc',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  statColumn: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  statLabel: {
-    color: '#bfdbfe',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  scrollContainer: {
-    flex: 1,
-    marginTop: 16,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  locationCard: {
-    marginHorizontal: 16,
-    marginBottom: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  mapContainer: {
-    height: 140,
-    width: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#e2e8f0',
-    marginBottom: 12,
-    position: 'relative',
-  },
-  mapLoaderOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  expandBtn: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(255,255,255,0.9)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, zIndex: 5 },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  headerBackground: { backgroundColor: '#1d4ed8', paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, marginBottom: 24 },
+  greetingText: { color: '#bfdbfe', fontSize: 16, fontWeight: '500' },
+  nameText: { color: '#ffffff', fontSize: 28, fontWeight: '800', marginTop: 4 },
+  uhidBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+  uhidText: { color: '#f8fafc', fontSize: 12, fontWeight: '600', marginLeft: 6 },
+  statsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
+  statColumn: { flex: 1, alignItems: 'center' },
+  statValue: { color: '#ffffff', fontSize: 20, fontWeight: '800' },
+  statLabel: { color: '#bfdbfe', fontSize: 12, fontWeight: '500', marginTop: 4 },
+  statDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.2)' },
+  scrollContainer: { flex: 1, marginTop: 16 },
+  scrollContent: { paddingBottom: 40 },
+  locationCard: { marginHorizontal: 16, marginBottom: 20, backgroundColor: '#ffffff', borderRadius: 20, padding: 12, borderWidth: 1, borderColor: '#e2e8f0' },
+  mapContainer: { height: 140, width: '100%', borderRadius: 12, overflow: 'hidden', backgroundColor: '#e2e8f0', marginBottom: 12 },
+  expandBtn: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(255,255,255,0.9)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', zIndex: 5 },
   fullScreenMapContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, backgroundColor: '#fff' },
-  fullScreenMap: { flex: 1, width: '100%', height: '100%', position: 'relative' },
-  mapBackBtn: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 20, left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, zIndex: 10 },
-  destinationInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
-    height: 52,
-    borderRadius: 12,
-    paddingLeft: 16,
-    paddingRight: 6,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  setLocationBtn: {
-    backgroundColor: '#1d4ed8',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  setLocationBtnText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  searchSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 20,
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    height: 52,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#0f172a',
-  },
-  filterButton: {
-    width: 52,
-    height: 52,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  categoriesScroll: {
-    marginBottom: 24,
-  },
-  categoryChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: 12,
-  },
-  categoryChipActive: {
-    backgroundColor: '#1d4ed8',
-    borderColor: '#1d4ed8',
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  categoryTextActive: {
-    color: '#ffffff',
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0f172a',
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: '#94a3b8',
-    fontWeight: '500',
-  },
-  servicesList: {
-    paddingHorizontal: 16,
-    gap: 16,
-  },
-  serviceCard: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  serviceIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  serviceDetails: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  serviceName: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: 4,
-  },
-  serviceDesc: {
-    fontSize: 13,
-    color: '#64748b',
-    marginBottom: 8,
-  },
-  badgesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  categoryBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  timeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timeBadgeText: {
-    fontSize: 12,
-    color: '#64748b',
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  servicePriceColumn: {
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  servicePrice: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  rxBadge: {
-    backgroundColor: '#fff7ed',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    marginTop: 4,
-  },
-  rxText: {
-    color: '#ea580c',
-    fontSize: 10,
-    fontWeight: '800',
-  }
+  mapBackBtn: { position: 'absolute', left: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, zIndex: 10 },
+  destinationInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f8fafc', height: 52, borderRadius: 12, paddingLeft: 16, paddingRight: 6, borderWidth: 1, borderColor: '#e2e8f0' },
+  setLocationBtn: { backgroundColor: '#1d4ed8', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  setLocationBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  searchSection: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 20 },
+  searchBar: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 50, borderRadius: 12, paddingHorizontal: 16, borderWidth: 1, borderColor: '#e2e8f0', marginRight: 12 },
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 15, color: '#0f172a' },
+  filterBtn: { width: 50, height: 50, backgroundColor: '#0f172a', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  categoriesContainer: { paddingHorizontal: 16, marginBottom: 24, height: 40 },
+  categoryBadge: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f1f5f9', marginRight: 12, height: 36, justifyContent: 'center' },
+  categoryBadgeActive: { backgroundColor: '#1d4ed8' },
+  categoryText: { color: '#64748b', fontSize: 14, fontWeight: '600' },
+  categoryTextActive: { color: '#ffffff' },
+  carePlusBanner: { backgroundColor: '#1d4ed8', marginHorizontal: 16, marginBottom: 24, borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', shadowColor: '#1d4ed8', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
+  carePlusContent: { flex: 1 },
+  carePlusBadge: { backgroundColor: '#fbbf24', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginBottom: 8 },
+  carePlusBadgeText: { fontSize: 10, fontWeight: '800', color: '#b45309' },
+  carePlusTitle: { fontSize: 20, fontWeight: '900', color: '#60a5fa', marginBottom: 4 },
+  carePlusSub: { color: '#bfdbfe', fontSize: 13, lineHeight: 18 },
+  featuresGrid: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 32 },
+  featureItem: { alignItems: 'center', width: 70 },
+  featureIconBox: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  featureItemText: { fontSize: 12, fontWeight: '600', color: '#475569', textAlign: 'center' },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingHorizontal: 20, marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  sectionSubtitle: { fontSize: 14, color: '#64748b', fontWeight: '500' },
+  packageCard: { width: 260, padding: 16, borderRadius: 16, borderWidth: 1, marginRight: 16 },
+  pkgDuration: { fontSize: 12, fontWeight: '800', marginBottom: 8 },
+  pkgTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 4 },
+  pkgDesc: { fontSize: 13, color: '#64748b', marginBottom: 16 },
+  pkgPrice: { fontSize: 18, fontWeight: '900' },
+  servicesGrid: { paddingHorizontal: 16 },
+  serviceCard: { flexDirection: 'row', backgroundColor: '#ffffff', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 6, elevation: 1 },
+  serviceIconContainer: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
+  serviceInfo: { flex: 1, justifyContent: 'center' },
+  serviceName: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 4 },
+  serviceDesc: { fontSize: 13, color: '#64748b', marginBottom: 8 },
+  serviceMeta: { flexDirection: 'row', alignItems: 'center' },
+  metaBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f1f5f9', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  metaText: { fontSize: 11, color: '#475569', fontWeight: '600', marginLeft: 4 },
+  priceContainer: { alignItems: 'flex-end', justifyContent: 'space-between' },
+  priceText: { fontSize: 18, fontWeight: '900', color: '#1d4ed8' },
+  bookBtn: { backgroundColor: '#0f172a', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+  bookBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' }
 });
