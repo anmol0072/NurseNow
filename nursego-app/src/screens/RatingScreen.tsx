@@ -3,16 +3,43 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, SafeAreaView, Plat
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function RatingScreen({ navigation }: any) {
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function RatingScreen({ route, navigation }: any) {
+  const { bookingId, nurseId } = route.params || {};
   const insets = useSafeAreaInsets();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (rating === 0) {
       if (Platform.OS === 'web') window.alert('Please select a rating');
       else Alert.alert('Error', 'Please select a rating');
       return;
+    }
+
+    try {
+      const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+      const userStr = await AsyncStorage.getItem('user');
+      const u = userStr ? JSON.parse(userStr) : null;
+
+      if (bookingId && nurseId && u) {
+        await fetch(`${BASE_URL}/api/reviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${u.token}`
+          },
+          body: JSON.stringify({
+            bookingId,
+            nurseId,
+            rating,
+            comment
+          })
+        });
+      }
+    } catch (e) {
+      console.error('Failed to submit review', e);
     }
     
     if (Platform.OS === 'web') {

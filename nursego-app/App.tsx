@@ -23,6 +23,7 @@ import FindingNurseScreen from './src/screens/FindingNurseScreen';
 import OffersScreen from './src/screens/OffersScreen';
 import ReferralScreen from './src/screens/ReferralScreen';
 import EmergencyContactsScreen from './src/screens/EmergencyContactsScreen';
+import FamilyDashboardScreen from './src/screens/FamilyDashboardScreen';
 import SubscriptionScreen from './src/screens/SubscriptionScreen';
 import HealthRecordsScreen from './src/screens/HealthRecordsScreen';
 import TreatmentReportForm from './src/screens/TreatmentReportForm';
@@ -96,6 +97,7 @@ export default function App() {
         <Stack.Screen name="Offers" component={OffersScreen} />
         <Stack.Screen name="Referral" component={ReferralScreen} />
         <Stack.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
+        <Stack.Screen name="FamilyDashboard" component={FamilyDashboardScreen} />
         <Stack.Screen name="Subscription" component={SubscriptionScreen} />
         <Stack.Screen name="HealthRecords" component={HealthRecordsScreen} />
         <Stack.Screen name="TreatmentReportForm" component={TreatmentReportForm} />

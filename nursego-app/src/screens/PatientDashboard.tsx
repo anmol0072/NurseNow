@@ -81,12 +81,17 @@ export default function PatientDashboard({ navigation }: any) {
         <View style={styles.statsRow}>
           <TouchableOpacity style={styles.statColumn} onPress={() => navigation.navigate('HealthRecords')}>
             <Text style={styles.statValue}>12</Text>
-            <Text style={styles.statLabel}>Health Records</Text>
+            <Text style={styles.statLabel}>Records</Text>
+          </TouchableOpacity>
+          <View style={styles.statDivider} />
+          <TouchableOpacity style={styles.statColumn} onPress={() => navigation.navigate('FamilyDashboard')}>
+            <Text style={styles.statValue}>Family</Text>
+            <Text style={styles.statLabel}>Dashboard</Text>
           </TouchableOpacity>
           <View style={styles.statDivider} />
           <TouchableOpacity style={styles.statColumn} onPress={() => navigation.navigate('Subscription')}>
             <Text style={styles.statValue}>{user?.isSubscribed ? 'Active' : 'Upgrade'}</Text>
-            <Text style={styles.statLabel}>Care+ Status</Text>
+            <Text style={styles.statLabel}>Care+</Text>
           </TouchableOpacity>
         </View>
       </View>
